@@ -27,14 +27,14 @@ export class UserController {
   ): Promise<WebResponse<{ username: string; name: string; token: string }>> {
     const result = await this.userService.login(request);
     return {
-      data: result,
+      data: result,  // Return the result which includes token
     };
   }
 
   @Get('/current')
   @HttpCode(200)
   async get(@Auth() user: User): Promise<WebResponse<UserResponse>> {
-    const result = await this.userService.get(user);  // Menggunakan `get` bukan `login`
+    const result = await this.userService.get(user);  // Use the `get` method to fetch user data
     return {
       data: result,
     };
@@ -57,7 +57,8 @@ export class UserController {
   async logout(
     @Auth() user: User,
   ): Promise<WebResponse<boolean>> {
-    await this.userService.logout(user);
+    // Optional: You can implement logic to invalidate or remove the token here
+    await this.userService.logout(user);  // Invalidate on client-side (no server-side token management for JWT)
     return {
       data: true,
     };
