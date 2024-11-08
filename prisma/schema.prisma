@@ -14,8 +14,6 @@ model User {
   name            String    @db.VarChar(100)
   email           String    @db.VarChar(100)
   token           String?   @db.VarChar(1024)
-  updatedAt       DateTime  @updatedAt
-  expiresAt       DateTime?
 
   @@map("users")
 }

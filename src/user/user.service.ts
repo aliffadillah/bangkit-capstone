@@ -1,5 +1,5 @@
 import { HttpException, Inject, Injectable } from "@nestjs/common";
-import { JwtService } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';  // Import JwtService
 import { LoginUserRequest, RegisterUserRequest, UpdateUserRequest, UserResponse } from '../model/user.model';
 import { ValidationService } from "../common/validation.service";
 import { Logger } from "winston";
@@ -15,7 +15,7 @@ export class UserService {
     private validationService: ValidationService,
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
     private prismaService: PrismaService,
-    private jwtService: JwtService,  // JwtService for generating JWT
+    private jwtService: JwtService,  // Tambahkan JwtService untuk JWT
   ) {}
 
   // Register user
@@ -69,14 +69,10 @@ export class UserService {
     const payload = { username: user.username };  // Define the payload for the JWT
     const token = this.jwtService.sign(payload);  // Sign the token with payload
 
-    // Set token expiration to 1 hour from now
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 1); // Set expiration to 1 hour from now
-
-    // Save the JWT token and expiration time in the user's record in the database
+    // Save the JWT token in the user's record in the database
     await this.prismaService.user.update({
       where: { username: user.username },
-      data: { token, expiresAt },  // Update token and expiration time
+      data: { token },  // Store the generated JWT token in the token field
     });
 
     return {
@@ -128,32 +124,12 @@ export class UserService {
 
   // Logout (invalidate the token on client side, as JWT is stateless)
   async logout(user: User): Promise<UserResponse> {
-    // JWT-based logout typically doesn't invalidate token on the server side,
-    // but you can implement token blacklist or instruct the client to delete the token.
+    // JWT-based logout typically doesn't invalidate token on server side,
+    // but you can implement token blacklist or just instruct client to delete token.
     // For now, just return the user data (client needs to delete token)
     return {
       username: user.username,
       name: user.name,
     };
-  }
-
-  // Remove expired tokens (you can call this periodically)
-  async removeExpiredTokens() {
-    const currentTime = new Date();
-
-    // Remove tokens that have expired (expiresAt < currentTime)
-    await this.prismaService.user.updateMany({
-      where: {
-        expiresAt: {
-          lt: currentTime,  // Token has expired
-        },
-      },
-      data: {
-        token: null,  // Set token to null
-        expiresAt: null,  // Optionally nullify the expiration field as well
-      },
-    });
-
-    this.logger.debug('Expired tokens removed.');
   }
 }
