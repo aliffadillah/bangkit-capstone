@@ -11,9 +11,32 @@ datasource db {
 model User {
   username        String    @id @db.VarChar(100)
   password        String    @db.VarChar(100)
-  name            String    @db.VarChar(100)
-  email           String    @db.VarChar(100)
+  name            String    @unique @db.VarChar(100)
+  email           String    @unique @db.VarChar(100)
   token           String?   @db.VarChar(1024)
 
+  profileByUsername Profile? @relation("UserByUsername")
+  profileByName     Profile? @relation("UserByName")
+  profileByEmail    Profile? @relation("UserByEmail")
+
   @@map("users")
+}
+
+model Profile {
+  id       Int     @id @default(autoincrement())
+  age      Int
+  gender   String  @db.VarChar(10)
+  height   Int
+  weight   Int
+  kcal     Int?
+  bmi      Int?
+  username String  @unique @db.VarChar(100)
+  name     String  @unique @db.VarChar(100)
+  email    String  @unique @db.VarChar(100)
+
+  userByUsername User @relation("UserByUsername", fields: [username], references: [username])
+  userByName     User @relation("UserByName", fields: [name], references: [name])
+  userByEmail    User @relation("UserByEmail", fields: [email], references: [email])
+
+  @@map("profile")
 }
