@@ -1,4 +1,8 @@
-import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NestMiddleware,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from './prisma.service';
 
@@ -6,7 +10,7 @@ import { PrismaService } from './prisma.service';
 export class AuthMiddleware implements NestMiddleware {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly prismaService: PrismaService
+    private readonly prismaService: PrismaService,
   ) {}
 
   async use(req: any, res: any, next: (error?: any) => void) {
@@ -17,7 +21,9 @@ export class AuthMiddleware implements NestMiddleware {
 
     const token = authHeader.split(' ')[1]; // Expecting 'Bearer <token>'
     if (!token) {
-      throw new UnauthorizedException('Token is missing from authorization header');
+      throw new UnauthorizedException(
+        'Token is missing from authorization header',
+      );
     }
 
     try {

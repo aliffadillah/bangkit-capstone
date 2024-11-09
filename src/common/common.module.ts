@@ -38,10 +38,15 @@ import { AuthMiddleware } from './auth.middleware';
   ],
   exports: [PrismaService, ValidationService, JwtModule],
 })
-
 export class CommonModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     // Middleware hanya diterapkan untuk rute yang memerlukan autentikasi (misalnya /api/users/current)
-    consumer.apply(AuthMiddleware).forRoutes('/api/users/current', '/api/users/update', '/api/users/logout');
+    consumer
+      .apply(AuthMiddleware)
+      .forRoutes(
+        '/api/users/current',
+        '/api/users/update',
+        '/api/users/logout',
+      );
   }
 }

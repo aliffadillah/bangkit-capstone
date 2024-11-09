@@ -1,12 +1,17 @@
-import { HttpException, Inject, Injectable } from "@nestjs/common";
-import { JwtService } from '@nestjs/jwt';  // Import JwtService
-import { LoginUserRequest, RegisterUserRequest, UpdateUserRequest, UserResponse } from '../model/user.model';
-import { ValidationService } from "../common/validation.service";
-import { Logger } from "winston";
-import { WINSTON_MODULE_PROVIDER } from "nest-winston";
-import { PrismaService } from "../common/prisma.service";
-import { UserValidation } from "./user.validation";
-import * as bcrypt from "bcrypt";
+import { HttpException, Inject, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt'; // Import JwtService
+import {
+  LoginUserRequest,
+  RegisterUserRequest,
+  UpdateUserRequest,
+  UserResponse,
+} from '../model/user.model';
+import { ValidationService } from '../common/validation.service';
+import { Logger } from 'winston';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { PrismaService } from '../common/prisma.service';
+import { UserValidation } from './user.validation';
+import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 
 @Injectable()
@@ -15,16 +20,14 @@ export class UserService {
     private validationService: ValidationService,
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
     private prismaService: PrismaService,
-    private jwtService: JwtService,  // Tambahkan JwtService untuk JWT
+    private jwtService: JwtService, // Tambahkan JwtService untuk JWT
   ) {}
 
   // Register user
   async register(request: RegisterUserRequest): Promise<UserResponse> {
     this.logger.debug(`Register new user ${JSON.stringify(request)}`);
-    const registerRequest: RegisterUserRequest = this.validationService.validate(
-      UserValidation.REGISTER,
-      request
-    );
+    const registerRequest: RegisterUserRequest =
+      this.validationService.validate(UserValidation.REGISTER, request);
 
     const totalUserWithUsername = await this.prismaService.user.count({
       where: {
@@ -48,7 +51,9 @@ export class UserService {
   }
 
   // Login user (generate JWT token)
-  async login(request: LoginUserRequest): Promise<{ username: string; name: string; token: string }> {
+  async login(
+    request: LoginUserRequest,
+  ): Promise<{ username: string; name: string; token: string }> {
     this.logger.debug(`UserService.login(${JSON.stringify(request)})`);
     const loginRequest: LoginUserRequest = this.validationService.validate(
       UserValidation.LOGIN,
@@ -61,24 +66,27 @@ export class UserService {
       },
     });
 
-    if (!user || !(await bcrypt.compare(loginRequest.password, user.password))) {
+    if (
+      !user ||
+      !(await bcrypt.compare(loginRequest.password, user.password))
+    ) {
       throw new HttpException('Username or password is invalid', 401);
     }
 
     // Generate JWT token
-    const payload = { username: user.username };  // Define the payload for the JWT
-    const token = this.jwtService.sign(payload);  // Sign the token with payload
+    const payload = { username: user.username }; // Define the payload for the JWT
+    const token = this.jwtService.sign(payload); // Sign the token with payload
 
     // Save the JWT token in the user's record in the database
     await this.prismaService.user.update({
       where: { username: user.username },
-      data: { token },  // Store the generated JWT token in the token field
+      data: { token }, // Store the generated JWT token in the token field
     });
 
     return {
       username: user.username,
       name: user.name,
-      token: token,  // Return the JWT token in the response
+      token: token, // Return the JWT token in the response
     };
   }
 

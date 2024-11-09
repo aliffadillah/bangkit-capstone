@@ -1,8 +1,11 @@
+// src/app.module.ts
+
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
-import { ScheduleModule } from '@nestjs/schedule';  // Import the schedule module
+import { ScheduleModule } from '@nestjs/schedule';
 import { CommonModule } from './common/common.module';
+import { ProfileModule } from './profile/profile.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -14,6 +17,7 @@ import { UserModule } from './user/user.module';
     }),
     ScheduleModule.forRoot(),
     CommonModule,
+    ProfileModule,
     UserModule,
   ],
   controllers: [],
