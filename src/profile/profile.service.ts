@@ -11,12 +11,10 @@ import {
 export class ProfileService {
   private profiles = [];
 
-
   calculateBMI(weight: number, height: number): number {
     const bmi = weight / (height / 100) ** 2;
     return parseFloat(bmi.toFixed(2)); // Rounded to 2 decimal places
   }
-
 
   calculateKcal(age: number, gender: string): number {
     const kcal = gender === 'Laki-Laki' ? 1600 + age * 2 : 1500 + age * 1.8;
