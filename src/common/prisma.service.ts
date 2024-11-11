@@ -1,3 +1,4 @@
+// src/common/prisma.service.ts
 import { PrismaClient, Prisma } from '@prisma/client';
 import { Logger } from 'winston';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';

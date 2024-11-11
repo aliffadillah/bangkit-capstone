@@ -8,6 +8,7 @@ import {
   Body,
   Headers,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import {
@@ -15,10 +16,14 @@ import {
   GetProfileDto,
   UpdateProfileDto,
 } from './profile.dto';
+import { JwtService } from '@nestjs/jwt'; // Add JwtService for token decoding
 
 @Controller('api/profile')
 export class ProfileController {
-  constructor(private readonly profileService: ProfileService) {}
+  constructor(
+    private readonly profileService: ProfileService,
+    private readonly jwtService: JwtService, // Inject JwtService
+  ) {}
 
   @Post()
   createProfile(@Body() createProfileDto: CreateProfileDto) {
@@ -39,10 +44,21 @@ export class ProfileController {
 
   @Patch('current')
   updateProfile(
-    @Headers('authorization') token: string,
+    @Headers('authorization') token: string, // Get the token from headers
     @Body() updateProfileDto: UpdateProfileDto,
   ) {
-    const username = 'alifmuhammad'; // contoh hardcoded, ganti sesuai kebutuhan
-    return this.profileService.updateProfile(updateProfileDto, username);
+    try {
+      // Decode the JWT token to extract user information (e.g., username)
+      const decoded = this.jwtService.decode(token.replace('Bearer ', ''));
+
+      if (!decoded || !decoded['username']) {
+        throw new UnauthorizedException('Invalid token or user not found');
+      }
+
+      const username = decoded['username']; // Extract username from decoded token
+      return this.profileService.updateProfile(updateProfileDto, username);
+    } catch (error) {
+      throw new UnauthorizedException('Token decoding failed');
+    }
   }
 }
