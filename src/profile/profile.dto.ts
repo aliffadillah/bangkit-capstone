@@ -1,5 +1,3 @@
-// src/profile/profile.dto.ts
-
 export class CreateProfileDto {
   age: number;
   gender: string;
@@ -18,4 +16,6 @@ export class UpdateProfileDto {
   gender?: string;
   height?: number;
   weight?: number;
+  bmi?: number;
+  kcal?: number;
 }

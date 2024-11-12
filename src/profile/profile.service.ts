@@ -1,41 +1,56 @@
-// src/profile/profile.service.ts
-
-import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  CreateProfileDto,
-  GetProfileDto,
-  UpdateProfileDto,
-} from './profile.dto';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../common/prisma.service';
+import { CreateProfileDto, GetProfileDto, UpdateProfileDto } from './profile.dto';
 
 @Injectable()
 export class ProfileService {
-  private profiles = [];
+  constructor(private prisma: PrismaService) {}
 
   calculateBMI(weight: number, height: number): number {
     const bmi = weight / (height / 100) ** 2;
-    return parseFloat(bmi.toFixed(2)); // Rounded to 2 decimal places
+    return parseFloat(bmi.toFixed(2));
   }
 
   calculateKcal(age: number, gender: string): number {
     const kcal = gender === 'Laki-Laki' ? 1600 + age * 2 : 1500 + age * 1.8;
-    return parseFloat(kcal.toFixed(2)); // Rounded to 2 decimal places
+    return parseFloat(kcal.toFixed(2));
   }
 
-  createProfile(createProfileDto: CreateProfileDto) {
+  async createProfile(createProfileDto: CreateProfileDto) {
     const { age, gender, height, weight, username } = createProfileDto;
+
+    const user = await this.prisma.user.findUnique({
+      where: { username },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User dengan username tersebut tidak ditemukan');
+    }
+
     const bmi = this.calculateBMI(Number(weight), height);
     const kcal = this.calculateKcal(age, gender);
 
-    const profile = { ...createProfileDto, bmi, kcal };
-    this.profiles.push(profile);
+    const profile = await this.prisma.profile.create({
+      data: {
+        age,
+        gender,
+        height,
+        weight,
+        bmi,
+        kcal,
+        username: user.username,
+        name: user.name,
+        email: user.email,
+      },
+    });
 
     return { data: profile };
   }
 
-  getProfile(getProfileDto: GetProfileDto) {
-    const profile = this.profiles.find(
-      (p) => p.username === getProfileDto.username,
-    );
+  async getProfile(getProfileDto: GetProfileDto) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { username: getProfileDto.username },
+    });
 
     if (!profile) {
       throw new NotFoundException('Data tidak ditemukan');
@@ -44,20 +59,40 @@ export class ProfileService {
     return { data: profile };
   }
 
-  updateProfile(updateProfileDto: UpdateProfileDto, username: string) {
-    const profile = this.profiles.find((p) => p.username === username);
+  async updateProfile(updateProfileDto: UpdateProfileDto, username: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { username },
+    });
 
     if (!profile) {
       throw new NotFoundException('Data tidak ditemukan');
     }
 
-    Object.assign(profile, updateProfileDto);
+    const updatedProfileData: Partial<UpdateProfileDto> = {
+      ...updateProfileDto,
+      height: updateProfileDto.height ? parseInt(updateProfileDto.height as any) : profile.height,
+      weight: updateProfileDto.weight ? parseInt(updateProfileDto.weight as any) : profile.weight,
+    };
 
-    if (profile.weight && profile.height) {
-      profile.bmi = this.calculateBMI(Number(profile.weight), profile.height);
-      profile.kcal = this.calculateKcal(profile.age, profile.gender);
+    if (updateProfileDto.weight && updateProfileDto.height) {
+      updatedProfileData.bmi = this.calculateBMI(
+        updatedProfileData.weight,
+        updatedProfileData.height
+      );
+      updatedProfileData.kcal = this.calculateKcal(
+        updateProfileDto.age ?? profile.age,
+        updateProfileDto.gender ?? profile.gender
+      );
     }
 
-    return { data: profile };
+
+    const updatedProfile = await this.prisma.profile.update({
+      where: { username },
+      data: updatedProfileData,
+    });
+
+    return { data: updatedProfile };
   }
+
+
 }

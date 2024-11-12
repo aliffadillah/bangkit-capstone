@@ -1,5 +1,3 @@
-// src/profile/profile.controller.ts
-
 import {
   Controller,
   Post,
@@ -16,24 +14,28 @@ import {
   GetProfileDto,
   UpdateProfileDto,
 } from './profile.dto';
-import { JwtService } from '@nestjs/jwt'; // Add JwtService for token decoding
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('api/profile')
 export class ProfileController {
   constructor(
     private readonly profileService: ProfileService,
-    private readonly jwtService: JwtService, // Inject JwtService
+    private readonly jwtService: JwtService,
   ) {}
 
   @Post()
-  createProfile(@Body() createProfileDto: CreateProfileDto) {
-    return this.profileService.createProfile(createProfileDto);
+  async createProfile(@Body() createProfileDto: CreateProfileDto) {
+    try {
+      return await this.profileService.createProfile(createProfileDto);
+    } catch (error) {
+      return { errors: 'Gagal membuat profil. Pastikan data sudah benar.' };
+    }
   }
 
   @Get('get')
-  getProfile(@Body() getProfileDto: GetProfileDto) {
+  async getProfile(@Body() getProfileDto: GetProfileDto) {
     try {
-      return this.profileService.getProfile(getProfileDto);
+      return await this.profileService.getProfile(getProfileDto);
     } catch (error) {
       if (error instanceof NotFoundException) {
         return { errors: 'Data tidak ditemukan' };
@@ -43,22 +45,30 @@ export class ProfileController {
   }
 
   @Patch('current')
-  updateProfile(
-    @Headers('authorization') token: string, // Get the token from headers
+  async updateProfile(
+    @Headers('authorization') token: string,
     @Body() updateProfileDto: UpdateProfileDto,
   ) {
+    if (!token) {
+      throw new UnauthorizedException('Token tidak tersedia');
+    }
+
     try {
-      // Decode the JWT token to extract user information (e.g., username)
       const decoded = this.jwtService.decode(token.replace('Bearer ', ''));
 
-      if (!decoded || !decoded['username']) {
-        throw new UnauthorizedException('Invalid token or user not found');
+      if (!decoded || typeof decoded !== 'object' || !decoded['username']) {
+        throw new UnauthorizedException('Token tidak valid atau pengguna tidak ditemukan');
       }
 
-      const username = decoded['username']; // Extract username from decoded token
-      return this.profileService.updateProfile(updateProfileDto, username);
+      const username = decoded['username'];
+      return await this.profileService.updateProfile(updateProfileDto, username);
     } catch (error) {
-      throw new UnauthorizedException('Token decoding failed');
+      if (error instanceof UnauthorizedException) {
+        return { errors: 'Token tidak valid atau pengguna tidak ditemukan' };
+      } else if (error instanceof NotFoundException) {
+        return { errors: 'Profil tidak ditemukan' };
+      }
+      return { errors: 'Gagal memperbarui profil' };
     }
   }
 }
