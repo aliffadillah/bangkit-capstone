@@ -1,6 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
-import { CreateProfileDto, GetProfileDto, UpdateProfileDto } from './profile.dto';
+import {
+  CreateProfileDto,
+  GetProfileDto,
+  UpdateProfileDto,
+} from './profile.dto';
 
 @Injectable()
 export class ProfileService {
@@ -24,7 +32,9 @@ export class ProfileService {
     });
 
     if (!user) {
-      throw new BadRequestException('User dengan username tersebut tidak ditemukan');
+      throw new BadRequestException(
+        'User dengan username tersebut tidak ditemukan',
+      );
     }
 
     const bmi = this.calculateBMI(Number(weight), height);
@@ -70,21 +80,24 @@ export class ProfileService {
 
     const updatedProfileData: Partial<UpdateProfileDto> = {
       ...updateProfileDto,
-      height: updateProfileDto.height ? parseInt(updateProfileDto.height as any) : profile.height,
-      weight: updateProfileDto.weight ? parseInt(updateProfileDto.weight as any) : profile.weight,
+      height: updateProfileDto.height
+        ? parseInt(updateProfileDto.height as any)
+        : profile.height,
+      weight: updateProfileDto.weight
+        ? parseInt(updateProfileDto.weight as any)
+        : profile.weight,
     };
 
     if (updateProfileDto.weight && updateProfileDto.height) {
       updatedProfileData.bmi = this.calculateBMI(
         updatedProfileData.weight,
-        updatedProfileData.height
+        updatedProfileData.height,
       );
       updatedProfileData.kcal = this.calculateKcal(
         updateProfileDto.age ?? profile.age,
-        updateProfileDto.gender ?? profile.gender
+        updateProfileDto.gender ?? profile.gender,
       );
     }
-
 
     const updatedProfile = await this.prisma.profile.update({
       where: { username },
@@ -93,6 +106,4 @@ export class ProfileService {
 
     return { data: updatedProfile };
   }
-
-
 }
