@@ -47,5 +47,4 @@ Response Body (Success/200) :
     }
   ]
 }
-
 ```
