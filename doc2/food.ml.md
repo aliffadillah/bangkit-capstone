@@ -4,14 +4,17 @@
 
 Endpoint : POST /api/ocr-food/
 
+Request Type: multipart/form-data
+
+Request Body:
+Image file (JPG): The image file containing the nutrition information, sent as file in multipart/form-data.
+Other Fields: Optional fields for manual input or additional data as needed.
+
 Request Body: :
 
 ```json
 {
-  "calories": "2000",
-  "sugar": "20",
-  "fats": "10",
-  "salt": "10",
+  file: image.jpg
   "date_added": "DateTime"
 }
 ```
@@ -19,14 +22,14 @@ Response Body (Success/200) :
 
 ```json
 {
-  "message": "Food item added successfully.",
+  "message": "Food item added successfully."
 }
 ```
 Response Body (Failed):
 
 ```json
 {
-  "errors" : "Data tidak ditemukan"
+  "errors": "Data not found or OCR failed."
 }
 ```
 
