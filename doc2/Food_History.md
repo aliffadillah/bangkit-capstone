@@ -2,7 +2,11 @@
 
 ### POST FOOD
 
-Endpoint : GET /api/history/{food_id}?username={username}
+Endpoint : GET /api/history/{food_id}?username={username}&date={date}
+
+* food_id: ID unik dari makanan (wajib).
+* username: Nama pengguna (wajib).
+* date: Tanggal untuk riwayat makanan yang diminta dalam format YYYY-MM-DD (opsional). Jika tidak diberikan, data default akan ditampilkan untuk tanggal saat ini.
 
 ### Headers:
 
