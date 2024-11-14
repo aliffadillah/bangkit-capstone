@@ -7,6 +7,7 @@ export class CreateProfileDto {
 }
 
 export class GetProfileDto {
+  user_id: string;
   username: string;
 }
 

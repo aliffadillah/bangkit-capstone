@@ -1,6 +1,7 @@
 export class RegisterUserRequest {
   username: string;
   password: string;
+  repeatPassword: string;
   name: string;
   email: string;
 }

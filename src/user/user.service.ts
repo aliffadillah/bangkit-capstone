@@ -26,10 +26,8 @@ export class UserService {
   // Register user
   async register(request: RegisterUserRequest): Promise<UserResponse> {
     this.logger.debug(`Register new user ${JSON.stringify(request)}`);
-    const registerRequest: RegisterUserRequest = this.validationService.validate(
-      UserValidation.REGISTER,
-      request
-    );
+    const registerRequest: RegisterUserRequest =
+      this.validationService.validate(UserValidation.REGISTER, request);
 
     if (registerRequest.password !== registerRequest.repeatPassword) {
       throw new HttpException('Password atau Repeat Password tidak sama', 400);

@@ -106,10 +106,7 @@ export class ProfileController {
     }
 
     try {
-      return await this.profileService.updateProfile(
-        updateProfileDto,
-        username,
-      );
+      return await this.profileService.updateProfile(updateProfileDto, username);
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         return { errors: 'Token tidak valid atau pengguna tidak ditemukan' };
