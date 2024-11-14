@@ -13,7 +13,7 @@ Request Body: :
 ```json
 {
   "nama": "teh pucuk ",
-  "category": "mie",
+  "category": "minuman",
   "calories": "2000",
   "sugar": "20",
   "fats": "10",
@@ -95,7 +95,7 @@ Response Body (Success/200) :
   "message": "Food item updated successfully."
   "data": {
     "food_id": "1",
-    "name": "niko",
+    "name": " teh pucuk",
     "calories": "2000",
     "sugar": "20",
     "fats": "10",
