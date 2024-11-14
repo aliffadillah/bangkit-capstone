@@ -6,7 +6,7 @@ Endpoint : POST /api/food/{food_id}?username={username}
 
 ### Headers:
 
-authorization: Authorization: Bearer <JWT_TOKEN>
+ Authorization: Bearer <JWT_TOKEN>
 
 Request Body: :
 
