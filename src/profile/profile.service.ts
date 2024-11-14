@@ -8,6 +8,7 @@ import {
   CreateProfileDto,
   GetProfileDto,
   UpdateProfileDto,
+  Gender,
 } from './profile.dto';
 
 @Injectable()
@@ -19,8 +20,8 @@ export class ProfileService {
     return parseFloat(bmi.toFixed(2));
   }
 
-  calculateKcal(age: number, gender: string): number {
-    const kcal = gender === 'Laki-Laki' ? 1600 + age * 2 : 1500 + age * 1.8;
+  calculateKcal(age: number, gender: Gender): number {
+    const kcal = gender === Gender.Laki_Laki ? 1600 + age * 2 : 1500 + age * 1.8;
     return parseFloat(kcal.toFixed(2));
   }
 
@@ -95,7 +96,7 @@ export class ProfileService {
       );
       updatedProfileData.kcal = this.calculateKcal(
         updateProfileDto.age ?? profile.age,
-        updateProfileDto.gender ?? profile.gender,
+        updateProfileDto.gender ?? profile.gender as Gender,
       );
     }
 
@@ -107,5 +108,3 @@ export class ProfileService {
     return { data: updatedProfile };
   }
 }
-
-//SERVICE MOTOR

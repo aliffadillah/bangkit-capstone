@@ -1,8 +1,11 @@
-//mentaL
+export enum Gender {
+  Laki_Laki = 'Laki_Laki',
+  Perempuan = 'Perempuan',
+}
 
 export class CreateProfileDto {
   age: number;
-  gender: string;
+  gender: Gender;
   height: number;
   weight: number;
   username: string;
@@ -14,7 +17,7 @@ export class GetProfileDto {
 
 export class UpdateProfileDto {
   age?: number;
-  gender?: string;
+  gender?: Gender;
   height?: number;
   weight?: number;
   bmi?: number;

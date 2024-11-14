@@ -22,17 +22,22 @@ model User {
   @@map("users")
 }
 
+enum Gender {
+  Laki_Laki
+  Perempuan
+}
+
 model Profile {
-  id       Int    @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   age      Int
-  gender   String @db.VarChar(100)
+  gender   Gender
   height   Int
   weight   Int
   kcal     Int?
   bmi      Int?
-  username String @unique @db.VarChar(100)
-  name     String @unique @db.VarChar(100)
-  email    String @unique @db.VarChar(100)
+  username String  @unique @db.VarChar(100)
+  name     String  @unique @db.VarChar(100)
+  email    String  @unique @db.VarChar(100)
 
   userByUsername User @relation("UserByUsername", fields: [username], references: [username])
   userByName     User @relation("UserByName", fields: [name], references: [name])
@@ -40,6 +45,7 @@ model Profile {
 
   @@map("profile")
 }
+
 
 
 model Foods {

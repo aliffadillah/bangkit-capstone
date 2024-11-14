@@ -1,5 +1,3 @@
-//oji
-
 import {
   Controller,
   Post,
