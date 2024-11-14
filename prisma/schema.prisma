@@ -19,6 +19,8 @@ model User {
   profileByName     Profile? @relation("UserByName")
   profileByEmail    Profile? @relation("UserByEmail")
 
+  foods Foods[]
+
   @@map("users")
 }
 
@@ -56,6 +58,9 @@ model Foods {
   fats         Int
   salt         Int
   date_added   DateTime
+  username     String @db.VarChar(100)
+
+  user User @relation(fields: [username], references: [username])
 
   @@map("foods")
 }
