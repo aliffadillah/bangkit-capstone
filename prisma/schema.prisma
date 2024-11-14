@@ -22,15 +22,10 @@ model User {
   @@map("users")
 }
 
-enum Gender {
-  Pria
-  Wanita
-}
-
 model Profile {
   id       Int    @id @default(autoincrement())
   age      Int
-  gender   Gender
+  gender   String @db.VarChar(100)
   height   Int
   weight   Int
   kcal     Int?
@@ -46,17 +41,11 @@ model Profile {
   @@map("profile")
 }
 
-enum Category {
-  Makanan_Ringan
-  Makanan_Berat
-  Snack
-  Minuman
-}
 
 model Foods {
   id           Int @id @default(autoincrement())
   nama_makanan String @db.VarChar(100)
-  category     Category
+  category     String @db.VarChar(100)
   calories     Int
   fats         Int
   salt         Int
