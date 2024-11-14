@@ -29,9 +29,7 @@ export class ProfileController {
     if (!token) {
       throw new UnauthorizedException('Token tidak tersedia');
     }
-
     const decoded = this.jwtService.decode(token.replace('Bearer ', ''));
-
     if (
       !decoded ||
       typeof decoded !== 'object' ||
@@ -106,10 +104,7 @@ export class ProfileController {
     }
 
     try {
-      return await this.profileService.updateProfile(
-        updateProfileDto,
-        username,
-      );
+      return await this.profileService.updateProfile(updateProfileDto, username);
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         return { errors: 'Token tidak valid atau pengguna tidak ditemukan' };

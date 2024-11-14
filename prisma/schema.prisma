@@ -22,15 +22,11 @@ model User {
   @@map("users")
 }
 
-enum Gender {
-  Male
-  Female
-}
 
 model Profile {
   id       Int    @id @default(autoincrement())
   age      Int
-  gender   Gender
+  gender   String @db.VarChar(100)
   height   Int
   weight   Int
   kcal     Int?

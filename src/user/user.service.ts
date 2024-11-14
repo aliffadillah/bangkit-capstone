@@ -148,7 +148,7 @@ export class UserService {
     // For now, just return the user data (client needs to delete token)
     return {
       username: user.username,
-      name: user.name,
+    name: user.name,
     };
   }
 }
