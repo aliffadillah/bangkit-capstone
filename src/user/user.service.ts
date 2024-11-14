@@ -26,8 +26,14 @@ export class UserService {
   // Register user
   async register(request: RegisterUserRequest): Promise<UserResponse> {
     this.logger.debug(`Register new user ${JSON.stringify(request)}`);
-    const registerRequest: RegisterUserRequest =
-      this.validationService.validate(UserValidation.REGISTER, request);
+    const registerRequest: RegisterUserRequest = this.validationService.validate(
+      UserValidation.REGISTER,
+      request
+    );
+
+    if (registerRequest.password !== registerRequest.repeatPassword) {
+      throw new HttpException('Password atau Repeat Password tidak sama', 400);
+    }
 
     const totalUserWithUsername = await this.prismaService.user.count({
       where: {
@@ -41,7 +47,12 @@ export class UserService {
 
     registerRequest.password = await bcrypt.hash(registerRequest.password, 10);
     const user = await this.prismaService.user.create({
-      data: registerRequest,
+      data: {
+        username: registerRequest.username,
+        password: registerRequest.password,
+        name: registerRequest.name,
+        email: registerRequest.email,
+      },
     });
 
     return {
