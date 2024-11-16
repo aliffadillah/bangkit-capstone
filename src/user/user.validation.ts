@@ -5,7 +5,7 @@ export class UserValidation {
     .object({
       username: z.string().min(1).max(100),
       password: z.string().min(1).max(100),
-      repeatPassword: z.string().min(1).max(100), // Add repeatPassword field
+      repeatPassword: z.string().min(1).max(100),
       name: z.string().min(1).max(100),
       email: z.string().min(1).max(100),
     })

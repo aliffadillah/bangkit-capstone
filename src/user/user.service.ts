@@ -1,5 +1,5 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt'; // Import JwtService
+import { JwtService } from '@nestjs/jwt';
 import {
   LoginUserRequest,
   RegisterUserRequest,
@@ -20,10 +20,9 @@ export class UserService {
     private validationService: ValidationService,
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
     private prismaService: PrismaService,
-    private jwtService: JwtService, // Tambahkan JwtService untuk JWT
+    private jwtService: JwtService,
   ) {}
 
-  // Register user
   async register(request: RegisterUserRequest): Promise<UserResponse> {
     this.logger.debug(`Register new user ${JSON.stringify(request)}`);
     const registerRequest: RegisterUserRequest =
@@ -59,7 +58,6 @@ export class UserService {
     };
   }
 
-  // Login user (generate JWT token)
   async login(
     request: LoginUserRequest,
   ): Promise<{ username: string; name: string; token: string }> {
@@ -82,24 +80,21 @@ export class UserService {
       throw new HttpException('Username or password is invalid', 401);
     }
 
-    // Generate JWT token
-    const payload = { username: user.username }; // Define the payload for the JWT
-    const token = this.jwtService.sign(payload); // Sign the token with payload
+    const payload = { username: user.username };
+    const token = this.jwtService.sign(payload);
 
-    // Save the JWT token in the user's record in the database
     await this.prismaService.user.update({
       where: { username: user.username },
-      data: { token }, // Store the generated JWT token in the token field
+      data: { token },
     });
 
     return {
       username: user.username,
       name: user.name,
-      token: token, // Return the JWT token in the response
+      token: token,
     };
   }
 
-  // Get current user data (using JWT token)
   async get(user: User): Promise<UserResponse> {
     return {
       username: user.username,
@@ -107,7 +102,6 @@ export class UserService {
     };
   }
 
-  // Update user data
   async update(user: User, request: UpdateUserRequest): Promise<UserResponse> {
     this.logger.debug(
       `UserService.update( ${JSON.stringify(user)} , ${JSON.stringify(request)}`,
@@ -139,11 +133,7 @@ export class UserService {
     };
   }
 
-  // Logout (invalidate the token on client side, as JWT is stateless)
   async logout(user: User): Promise<UserResponse> {
-    // JWT-based logout typically doesn't invalidate token on server side,
-    // but you can implement token blacklist or just instruct client to delete token.
-    // For now, just return the user data (client needs to delete token)
     return {
       username: user.username,
       name: user.name,

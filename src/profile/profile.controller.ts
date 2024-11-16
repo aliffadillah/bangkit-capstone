@@ -41,7 +41,6 @@ export class ProfileController {
     }
 
     try {
-      // Add 'username' to the DTO before passing it to the service
       const profileData = { ...createProfileDto, username };
       return await this.profileService.createProfile(profileData);
     } catch (error) {
@@ -71,7 +70,6 @@ export class ProfileController {
     }
 
     try {
-      // Passing only the 'username' query param to the service
       return await this.profileService.getProfile({ username });
     } catch (error) {
       if (error instanceof NotFoundException) {
