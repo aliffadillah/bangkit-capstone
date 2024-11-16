@@ -51,16 +51,20 @@ model Profile {
 
 
 model Foods {
-  id           Int @id @default(autoincrement())
-  nama_makanan String @db.VarChar(100)
-  category     String @db.VarChar(100)
+  id           Int      @id @default(autoincrement())
+  nama_makanan String   @db.VarChar(100)
+  category     String   @db.VarChar(100)
   calories     Int
   fats         Int
   salt         Int
   date_added   DateTime
-  username     String @db.VarChar(100)
+  username     String   @db.VarChar(100)
 
-  user User @relation(fields: [username], references: [username])
+  user         User     @relation(fields: [username], references: [username])
 
   @@map("foods")
 }
+
+
+
+

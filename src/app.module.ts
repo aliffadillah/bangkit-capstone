@@ -7,6 +7,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CommonModule } from './common/common.module';
 import { ProfileModule } from './profile/profile.module';
 import { UserModule } from './user/user.module';
+import { FoodsModule } from './foods/foods.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UserModule } from './user/user.module';
     CommonModule,
     ProfileModule,
     UserModule,
+    FoodsModule,
   ],
   controllers: [],
   providers: [],

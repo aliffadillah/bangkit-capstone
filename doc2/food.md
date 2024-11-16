@@ -1,8 +1,10 @@
 # FOOD API SPEC 
 
+# KURANG TAMBAHAN FITUR FILTER UNTUK HISTORY BASED ON DATE ADDED  
+
 ### POST FOOD 
 
-Endpoint : POST /api/food/{food_id}?username={username}
+Endpoint : POST /api/food/username={username}
 
 ### Headers:
 

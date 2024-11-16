@@ -21,7 +21,8 @@ export class ProfileService {
   }
 
   calculateKcal(age: number, gender: Gender): number {
-    const kcal = gender === Gender.Laki_Laki ? 1600 + age * 2 : 1500 + age * 1.8;
+    const kcal =
+      gender === Gender.Laki_Laki ? 1600 + age * 2 : 1500 + age * 1.8;
     return parseFloat(kcal.toFixed(2));
   }
 
@@ -96,7 +97,7 @@ export class ProfileService {
       );
       updatedProfileData.kcal = this.calculateKcal(
         updateProfileDto.age ?? profile.age,
-        updateProfileDto.gender ?? profile.gender as Gender,
+        updateProfileDto.gender ?? (profile.gender as Gender),
       );
     }
 
