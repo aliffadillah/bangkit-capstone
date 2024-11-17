@@ -34,12 +34,12 @@ export class FoodsService {
 
   private mapCategoryToDisplay(category: string): string {
     const FoodCategoryMapping = {
-      MAKANAN_BERAT: "Makanan Berat",
-      MAKANAN_RINGAN: "Makanan Ringan",
-      MINUMAN_NON_SODA: "Minuman Non-Soda",
-      MINUMAN_BERSODA: "Minuman Bersoda",
-      MINUMAN_SEHAT: "Minuman Sehat",
-      PRODUK_BEKU: "Produk Beku",
+      MAKANAN_BERAT: 'Makanan Berat',
+      MAKANAN_RINGAN: 'Makanan Ringan',
+      MINUMAN_NON_SODA: 'Minuman Non-Soda',
+      MINUMAN_BERSODA: 'Minuman Bersoda',
+      MINUMAN_SEHAT: 'Minuman Sehat',
+      PRODUK_BEKU: 'Produk Beku',
     };
     return FoodCategoryMapping[category] || category;
   }
