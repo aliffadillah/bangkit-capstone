@@ -9,10 +9,12 @@ import {
   Query,
   Headers,
   NotFoundException,
+  UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { FoodsService } from './foods.service';
 import { JwtService } from '@nestjs/jwt';
-import { UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { UserFoodsDTO } from './foods.dto';
 
 @Controller('api/food')
 export class FoodsController {
@@ -20,6 +22,7 @@ export class FoodsController {
     private readonly foodsService: FoodsService,
     private readonly jwtService: JwtService,
   ) {}
+
   private validateToken(authHeader: string): { username: string } {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('Missing or invalid token');
@@ -37,7 +40,7 @@ export class FoodsController {
   async addFood(
     @Headers('authorization') authHeader: string,
     @Query('username') username: string,
-    @Body() data: any,
+    @Body() data: (typeof UserFoodsDTO.POST)['_type'], // Menggunakan DTO untuk validasi input
   ) {
     const payload = this.validateToken(authHeader);
 
@@ -88,16 +91,16 @@ export class FoodsController {
       throw new UnauthorizedException('Unauthorized user');
     }
 
-    if(!date || isNaN(Date.parse(date))) {
+    if (!date || isNaN(Date.parse(date))) {
       throw new BadRequestException('Invalid or missing date parameter');
     }
 
     try {
       const history = await this.foodsService.getHistoryByDate(username, date);
-      if (history.length === 0 ) {
+      if (history.length === 0) {
         return { message: 'No history found.' };
       }
-      return { data: history};
+      return { data: history };
     } catch (error) {
       return { errors: 'Server Error' };
     }
@@ -108,7 +111,7 @@ export class FoodsController {
     @Headers('authorization') authHeader: string,
     @Param('id') foodId: string,
     @Query('username') username: string,
-    @Body() data: any,
+    @Body() data: (typeof UserFoodsDTO.UPDATE)['_type'], // Menggunakan DTO untuk validasi input
   ) {
     const payload = this.validateToken(authHeader);
 
