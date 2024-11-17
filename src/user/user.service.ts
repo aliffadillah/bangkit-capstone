@@ -15,6 +15,7 @@ import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 import { ZodError } from 'zod';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -191,6 +192,15 @@ export class UserService {
         updateData.email = updateRequest.email;
       }
 
+      // Ensure that at least one field is being updated
+      if (Object.keys(updateData).length === 0) {
+        this.throwError('No data to update', 400, [
+          'name',
+          'password',
+          'email',
+        ]);
+      }
+
       // Update the user data in the database
       const result = await this.prismaService.user.update({
         where: {
@@ -212,7 +222,17 @@ export class UserService {
           error.errors.map((e) => e.message),
         );
       }
-      throw error;
+
+      // Handle database-specific errors (e.g., user not found, constraint violations)
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          this.throwError('Email already in use', 400, ['email']);
+        }
+        // Add more specific database error handling as needed
+      }
+
+      // Handle any other errors
+      this.throwError('Error updating user', 500, ['update']);
     }
   }
 
