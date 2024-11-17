@@ -41,7 +41,7 @@ Response Body (Failed):
 ### GET FOOD
 
 Endpoint : GET /api/food/{food_id}?username={username}
-
+Endpoint History based od Date Added: GET /api/food/username={username}?date={tanggal}
 ### Headers:
 
 authorization: Authorization: Bearer <JWT_TOKEN>

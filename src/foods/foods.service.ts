@@ -31,6 +31,26 @@ export class FoodsService {
     return food;
   }
 
+  async getHistoryByDate(username: string, date: string)  {
+    const startDate = new Date(date);
+    const endDate = new Date(date);
+    endDate.setDate(startDate.getDate() + 1);
+
+    const history = await this.prisma.foods.findMany({
+      where: {
+        username,
+        date_added: {
+          gte: startDate,
+          lt: endDate,
+        },
+      },
+      orderBy: { date_added: 'asc'},
+    });
+
+    return history;
+  }
+
+
   async updateFood(foodId: number, username: string, data: any) {
     const existingFood = await this.prisma.foods.findFirst({
       where: {

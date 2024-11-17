@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { FoodsService } from './foods.service';
 import { JwtService } from '@nestjs/jwt';
-import { UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException, BadRequestException } from '@nestjs/common';
 
 @Controller('api/food')
 export class FoodsController {
@@ -74,6 +74,33 @@ export class FoodsController {
     }
 
     return await this.foodsService.getFoodById(Number(foodId), username);
+  }
+
+  @Get()
+  async getHistory(
+    @Headers('authorization') authHeader: string,
+    @Query('username') username: string,
+    @Query('date') date: string,
+  ) {
+    const payload = this.validateToken(authHeader);
+
+    if (payload.username !== username) {
+      throw new UnauthorizedException('Unauthorized user');
+    }
+
+    if(!date || isNaN(Date.parse(date))) {
+      throw new BadRequestException('Invalid or missing date parameter');
+    }
+
+    try {
+      const history = await this.foodsService.getHistoryByDate(username, date);
+      if (history.length === 0 ) {
+        return { message: 'No history found.' };
+      }
+      return { data: history};
+    } catch (error) {
+      return { errors: 'Server Error' };
+    }
   }
 
   @Patch(':id')
