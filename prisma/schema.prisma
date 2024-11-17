@@ -48,10 +48,19 @@ model Profile {
   @@map("profile")
 }
 
+enum FoodCategory {
+  Makanan_Berat     @map("Makanan Berat")
+  Makanan_Ringan    @map("Makanan Ringan")
+  Minuman_Non_Soda  @map("Minuman Non-Soda")
+  Minuman_Bersoda   @map("Minuman Bersoda")
+  Minuman_Sehat     @map("Minuman Sehat")
+  Produk_Beku       @map("Produk Beku")
+}
+
 model Foods {
   id           Int      @id @default(autoincrement())
   nama_makanan String   @db.VarChar(100)
-  category     String   @db.VarChar(100)
+  category     FoodCategory
   calories     Int
   sugar        Int
   fats         Int
