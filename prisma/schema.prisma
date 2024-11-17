@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Table
+model User {
+  username String  @id @db.VarChar(100)
+  password String  @db.VarChar(100)
+  name     String  @unique @db.VarChar(100)
+  email    String  @unique @db.VarChar(100)
+  token    String? @db.VarChar(1024)
+
+  profileByUsername Profile? @relation("UserByUsername")
+  profileByName     Profile? @relation("UserByName")
+  profileByEmail    Profile? @relation("UserByEmail")
+
+  foods Foods[]
+
+  @@map("users")
+}
+
+enum Gender {
+  Laki_Laki
+  Perempuan
+}
+
+model Profile {
+  id       Int    @id @default(autoincrement())
+  age      Int
+  gender   Gender
+  height   Int
+  weight   Int
+  kcal     Int?
+  bmi      Int?
+  username String @unique @db.VarChar(100)
+  name     String @unique @db.VarChar(100)
+  email    String @unique @db.VarChar(100)
+
+  userByUsername User @relation("UserByUsername", fields: [username], references: [username])
+  userByName     User @relation("UserByName", fields: [name], references: [name])
+  userByEmail    User @relation("UserByEmail", fields: [email], references: [email])
+
+  @@map("profile")
+}
+
+model Foods {
+  id           Int      @id @default(autoincrement())
+  nama_makanan String   @db.VarChar(100)
+  category     String   @db.VarChar(100)
+  calories     Int
+  sugar        Int
+  fats         Int
+  salt         Int
+  date_added   DateTime
+  username     String   @db.VarChar(100)
+  grade        String?  @db.VarChar(10) // Opsional sementara
+  user         User     @relation(fields: [username], references: [username])
+
+  @@map("foods")
+}
