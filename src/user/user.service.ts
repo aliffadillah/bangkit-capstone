@@ -5,6 +5,7 @@ import {
   RegisterUserRequest,
   UpdateUserRequest,
   UserResponse,
+  LogoutResponse,
 } from '../model/user.model';
 import { ValidationService } from '../common/validation.service';
 import { Logger } from 'winston';
@@ -23,6 +24,23 @@ export class UserService {
     private prismaService: PrismaService,
     private jwtService: JwtService,
   ) {}
+
+  // Helper function for consistent error responses
+  private throwError(
+    message: string,
+    statusCode: number,
+    details: string[] = [],
+  ): void {
+    throw new HttpException(
+      {
+        statusCode,
+        message,
+        details,
+      },
+      statusCode,
+    );
+  }
+
   async register(request: RegisterUserRequest): Promise<UserResponse> {
     this.logger.debug(`Register new user ${JSON.stringify(request)}`);
 
@@ -33,7 +51,10 @@ export class UserService {
 
       // Check if password and repeatPassword match
       if (registerRequest.password !== registerRequest.repeatPassword) {
-        throw new HttpException('Passwords do not match', 400);
+        this.throwError('Passwords do not match', 400, [
+          'password',
+          'repeatPassword',
+        ]);
       }
 
       // Check if the username already exists
@@ -44,7 +65,7 @@ export class UserService {
       });
 
       if (totalUserWithUsername !== 0) {
-        throw new HttpException('Username already exists', 400);
+        this.throwError('Username already exists', 400, ['username']);
       }
 
       // Hash the password before saving
@@ -69,14 +90,16 @@ export class UserService {
       };
     } catch (error) {
       if (error instanceof ZodError) {
-        throw new HttpException(
-          { message: 'Validation error', errors: error.errors },
+        this.throwError(
+          'Validation error',
           400,
+          error.errors.map((e) => e.message),
         );
       }
       throw error;
     }
   }
+
   async login(
     request: LoginUserRequest,
   ): Promise<{ username: string; name: string; token: string }> {
@@ -101,7 +124,10 @@ export class UserService {
         !user ||
         !(await bcrypt.compare(loginRequest.password, user.password))
       ) {
-        throw new HttpException('Username or password is invalid', 401);
+        this.throwError('Username or password is invalid', 401, [
+          'username',
+          'password',
+        ]);
       }
 
       // Generate a JWT token
@@ -121,20 +147,23 @@ export class UserService {
       };
     } catch (error) {
       if (error instanceof ZodError) {
-        throw new HttpException(
-          { message: 'Validation error', errors: error.errors },
+        this.throwError(
+          'Validation error',
           400,
+          error.errors.map((e) => e.message),
         );
       }
       throw error;
     }
   }
+
   async get(user: User): Promise<UserResponse> {
     return {
       username: user.username,
       name: user.name,
     };
   }
+
   async update(user: User, request: UpdateUserRequest): Promise<UserResponse> {
     this.logger.debug(
       `UserService.update(${JSON.stringify(user)}, ${JSON.stringify(request)})`,
@@ -177,26 +206,34 @@ export class UserService {
       };
     } catch (error) {
       if (error instanceof ZodError) {
-        throw new HttpException(
-          { message: 'Validation error', errors: error.errors },
+        this.throwError(
+          'Validation error',
           400,
+          error.errors.map((e) => e.message),
         );
       }
       throw error;
     }
   }
-  async logout(user: User): Promise<UserResponse> {
+
+  async logout(user: User): Promise<LogoutResponse> {
     this.logger.debug(`UserService.logout(${JSON.stringify(user)})`);
 
-    // Remove the token from the user in the database
-    await this.prismaService.user.update({
-      where: { username: user.username },
-      data: { token: null },
-    });
+    try {
+      // Remove the token from the user in the database
+      await this.prismaService.user.update({
+        where: { username: user.username },
+        data: { token: null },
+      });
 
-    return {
-      username: user.username,
-      name: user.name,
-    };
+      // Return a clear success message
+      return {
+        username: user.username,
+        name: user.name,
+        message: 'Successfully logged out',
+      };
+    } catch (error) {
+      this.throwError('Error during logout', 500, ['logout']);
+    }
   }
 }

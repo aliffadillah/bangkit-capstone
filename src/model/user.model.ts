@@ -11,6 +11,7 @@ export class UserResponse {
   name: string;
   email?: string;
   token?: string;
+  message?: string; // Add the message property here
 }
 
 export class LoginUserRequest {
@@ -22,4 +23,10 @@ export class UpdateUserRequest {
   name?: string;
   password?: string;
   email?: string;
+}
+
+export class LogoutResponse {
+  username: string;
+  name: string;
+  message: string;
 }

@@ -70,7 +70,7 @@ export class UserController {
   async logout(@Auth() user: User): Promise<WebResponse<boolean>> {
     await this.userService.logout(user);
     return {
-      data: true,
+      message: 'You have successfully logged out.'
     };
   }
 }
