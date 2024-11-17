@@ -20,7 +20,6 @@ export class FoodsController {
     private readonly foodsService: FoodsService,
     private readonly jwtService: JwtService,
   ) {}
-
   private validateToken(authHeader: string): { username: string } {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('Missing or invalid token');

@@ -55,6 +55,7 @@ model Foods {
   nama_makanan String   @db.VarChar(100)
   category     String   @db.VarChar(100)
   calories     Int
+  sugar        Int
   fats         Int
   salt         Int
   date_added   DateTime

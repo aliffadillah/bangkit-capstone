@@ -5,6 +5,7 @@ export class UserFoodsDTO {
     nama_makanan: z.string().min(1).max(100),
     category: z.string().min(1).max(100),
     calories: z.number().min(1).max(1000),
+    sugar: z.number().min(1).max(1000),
     fats: z.number().min(1).max(100),
     salt: z.number().min(1).max(100),
   });
@@ -13,6 +14,7 @@ export class UserFoodsDTO {
     nama_makanan: z.string().min(1).max(100),
     category: z.string().min(1).max(100),
     calories: z.number().min(1).max(1000),
+    sugar: z.number().min(1).max(1000),
     fats: z.number().min(1).max(100),
     salt: z.number().min(1).max(100),
   });
