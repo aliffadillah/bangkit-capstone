@@ -30,16 +30,17 @@ enum Gender {
 }
 
 model Profile {
-  id       Int    @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   age      Int
   gender   Gender
   height   Int
   weight   Int
   kcal     Int?
   bmi      Int?
-  username String @unique @db.VarChar(100)
-  name     String @unique @db.VarChar(100)
-  email    String @unique @db.VarChar(100)
+  username String  @unique @db.VarChar(100)
+  name     String  @unique @db.VarChar(100)
+  email    String  @unique @db.VarChar(100)
+  photoUrl String? @db.VarChar(255)
 
   userByUsername User @relation("UserByUsername", fields: [username], references: [username])
   userByName     User @relation("UserByName", fields: [name], references: [name])
@@ -49,26 +50,26 @@ model Profile {
 }
 
 enum FoodCategory {
-  Makanan_Berat     @map("Makanan Berat")
-  Makanan_Ringan    @map("Makanan Ringan")
-  Minuman_Non_Soda  @map("Minuman Non-Soda")
-  Minuman_Bersoda   @map("Minuman Bersoda")
-  Minuman_Sehat     @map("Minuman Sehat")
-  Produk_Beku       @map("Produk Beku")
+  Makanan_Berat    @map("Makanan Berat")
+  Makanan_Ringan   @map("Makanan Ringan")
+  Minuman_Non_Soda @map("Minuman Non-Soda")
+  Minuman_Bersoda  @map("Minuman Bersoda")
+  Minuman_Sehat    @map("Minuman Sehat")
+  Produk_Beku      @map("Produk Beku")
 }
 
 model Foods {
-  id           Int      @id @default(autoincrement())
-  nama_makanan String   @db.VarChar(100)
+  id           Int          @id @default(autoincrement())
+  nama_makanan String       @db.VarChar(100)
   category     FoodCategory
   calories     Int
   sugar        Int
   fats         Int
   salt         Int
   date_added   DateTime
-  username     String   @db.VarChar(100)
-  grade        String?  @db.VarChar(10) // Opsional sementara
-  user         User     @relation(fields: [username], references: [username])
+  username     String       @db.VarChar(100)
+  grade        String?      @db.VarChar(10) // Opsional sementara
+  user         User         @relation(fields: [username], references: [username])
 
   @@map("foods")
 }

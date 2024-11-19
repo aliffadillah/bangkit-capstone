@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
+import { GoogleCloudStorageService } from '../common/google-cloud-storage.service';
 import {
   CreateProfileDto,
   GetProfileDto,
@@ -14,7 +15,10 @@ import {
 
 @Injectable()
 export class ProfileService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private googleCloudStorageService: GoogleCloudStorageService,
+  ) {}
 
   calculateBMI(weight: number, height: number): number {
     const bmi = weight / (height / 100) ** 2;
@@ -27,10 +31,12 @@ export class ProfileService {
     return parseFloat(kcal.toFixed(2));
   }
 
-  async createProfile(createProfileDto: CreateProfileDto) {
+  async createProfile(
+    createProfileDto: CreateProfileDto,
+    file?: Express.Multer.File,
+  ) {
     const { age, gender, height, weight, username } = createProfileDto;
 
-    // Validate user existence
     const user = await this.prisma.user.findUnique({
       where: { username },
     });
@@ -41,16 +47,19 @@ export class ProfileService {
       );
     }
 
-    // Check if age, weight, and height are positive values
     if (age <= 0 || weight <= 0 || height <= 0) {
       throw new BadRequestException(
         'Age, weight, and height must be positive values.',
       );
     }
 
-    // Calculate BMI and Kcal
-    const bmi = this.calculateBMI(Number(weight), height);
+    const bmi = this.calculateBMI(weight, height);
     const kcal = this.calculateKcal(age, gender);
+
+    let photoUrl: string | undefined = undefined;
+    if (file) {
+      photoUrl = await this.googleCloudStorageService.uploadFile(file);
+    }
 
     try {
       const profile = await this.prisma.profile.create({
@@ -64,6 +73,7 @@ export class ProfileService {
           username: user.username,
           name: user.name,
           email: user.email,
+          photoUrl,
         },
       });
       return { data: profile };
@@ -86,7 +96,11 @@ export class ProfileService {
     return { data: profile };
   }
 
-  async updateProfile(updateProfileDto: UpdateProfileDto, username: string) {
+  async updateProfile(
+    updateProfileDto: UpdateProfileDto,
+    username: string,
+    file?: Express.Multer.File,
+  ) {
     const profile = await this.prisma.profile.findUnique({
       where: { username },
     });
@@ -105,7 +119,6 @@ export class ProfileService {
         : profile.weight,
     };
 
-    // Validate weight and height
     if (updateProfileDto.weight && updateProfileDto.height) {
       if (updateProfileDto.weight <= 0 || updateProfileDto.height <= 0) {
         throw new BadRequestException(
@@ -120,6 +133,11 @@ export class ProfileService {
         updateProfileDto.age ?? profile.age,
         updateProfileDto.gender ?? (profile.gender as Gender),
       );
+    }
+
+    if (file) {
+      updatedProfileData.photoUrl =
+        await this.googleCloudStorageService.uploadFile(file);
     }
 
     try {

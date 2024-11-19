@@ -1,5 +1,3 @@
-// src/app.module.ts
-
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
@@ -8,6 +6,7 @@ import { CommonModule } from './common/common.module';
 import { ProfileModule } from './profile/profile.module';
 import { UserModule } from './user/user.module';
 import { FoodsModule } from './foods/foods.module';
+import { GoogleCloudStorageService } from './common/google-cloud-storage.service'; // Import service GCS
 
 @Module({
   imports: [
@@ -23,6 +22,6 @@ import { FoodsModule } from './foods/foods.module';
     FoodsModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [GoogleCloudStorageService], // Tambahkan GoogleCloudStorageService ke dalam providers
 })
 export class AppModule {}
