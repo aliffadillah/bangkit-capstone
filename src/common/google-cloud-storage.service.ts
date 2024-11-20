@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Storage } from '@google-cloud/storage';
-import * as fs from 'fs';
 import * as path from 'path';
 
 @Injectable()
