@@ -1,8 +1,6 @@
 import {
   Injectable,
-  NotFoundException,
-  BadRequestException,
-  InternalServerErrorException,
+  HttpException,
 } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { GoogleCloudStorageService } from '../common/google-cloud-storage.service';
@@ -19,6 +17,17 @@ export class ProfileService {
     private prisma: PrismaService,
     private googleCloudStorageService: GoogleCloudStorageService,
   ) {}
+
+  throwError(message: string, statusCode: number, details: string[] = []): void {
+    throw new HttpException(
+      {
+        statusCode,
+        message,
+        details,
+      },
+      statusCode,
+    );
+  }
 
   calculateBMI(weight: number, height: number): number {
     const bmi = weight / (height / 100) ** 2;
@@ -42,21 +51,37 @@ export class ProfileService {
     });
 
     if (!user) {
-      throw new BadRequestException(
+      this.throwError(
         'User dengan username tersebut tidak ditemukan',
+        400,
+        ['username'],
+      );
+    }
+
+    const existingProfile = await this.prisma.profile.findUnique({
+      where: { username },
+    });
+
+    if (existingProfile) {
+      this.throwError(
+        'Tidak bisa melakukan POST, karena data sudah tersedia',
+        400,
+        ['profile'],
       );
     }
 
     if (age <= 0 || weight <= 0 || height <= 0) {
-      throw new BadRequestException(
+      this.throwError(
         'Age, weight, and height must be positive values.',
+        400,
+        ['age', 'weight', 'height'],
       );
     }
 
     const bmi = this.calculateBMI(weight, height);
     const kcal = this.calculateKcal(age, gender);
 
-    let photoUrl: string | undefined = undefined;
+    let photoUrl: string = 'https://storage.googleapis.com/db-cpastone/default-image/default';
     if (file) {
       photoUrl = await this.googleCloudStorageService.uploadFile(file);
     }
@@ -78,11 +103,13 @@ export class ProfileService {
       });
       return { data: profile };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Gagal membuat profil. Silakan coba lagi.',
-      );
+      this.throwError('Gagal membuat profil. Silakan coba lagi.', 500, [
+        'createProfile',
+      ]);
     }
   }
+
+
 
   async getProfile(getProfileDto: GetProfileDto) {
     const profile = await this.prisma.profile.findUnique({
@@ -90,7 +117,7 @@ export class ProfileService {
     });
 
     if (!profile) {
-      throw new NotFoundException('Data profil tidak ditemukan');
+      this.throwError('Data profil tidak ditemukan', 404, ['username']);
     }
 
     return { data: profile };
@@ -106,7 +133,7 @@ export class ProfileService {
     });
 
     if (!profile) {
-      throw new NotFoundException('Profil tidak ditemukan');
+      this.throwError('Profil tidak ditemukan', 404, ['username']);
     }
 
     const updatedProfileData: Partial<UpdateProfileDto> = {
@@ -119,10 +146,12 @@ export class ProfileService {
         : profile.weight,
     };
 
-    if (updateProfileDto.weight && updateProfileDto.height) {
-      if (updateProfileDto.weight <= 0 || updateProfileDto.height <= 0) {
-        throw new BadRequestException(
-          'Weight and height must be positive values.',
+    if (updateProfileDto.weight || updateProfileDto.height || updatedProfileData.age) {
+      if (updateProfileDto.weight <= 0 || updateProfileDto.height <= 0 || updateProfileDto.age <= 0) {
+        this.throwError(
+          'Age, weight, dan height harus memiliki nilai positif.',
+          400,
+          ['age', 'weight', 'height'],
         );
       }
       updatedProfileData.bmi = this.calculateBMI(
@@ -147,8 +176,10 @@ export class ProfileService {
       });
       return { data: updatedProfile };
     } catch (error) {
-      throw new InternalServerErrorException(
+      this.throwError(
         'Gagal memperbarui profil. Silakan coba lagi.',
+        500,
+        ['updateProfile'],
       );
     }
   }
