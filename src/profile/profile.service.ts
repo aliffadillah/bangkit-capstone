@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  HttpException,
-} from '@nestjs/common';
+import { Injectable, HttpException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { GoogleCloudStorageService } from '../common/google-cloud-storage.service';
 import {
@@ -10,6 +7,7 @@ import {
   UpdateProfileDto,
   Gender,
 } from './profile.dto';
+import * as mime from 'mime-types';  // Import mime-types for file validation
 
 @Injectable()
 export class ProfileService {
@@ -18,7 +16,11 @@ export class ProfileService {
     private googleCloudStorageService: GoogleCloudStorageService,
   ) {}
 
-  throwError(message: string, statusCode: number, details: string[] = []): void {
+  throwError(
+    message: string,
+    statusCode: number,
+    details: string[] = [],
+  ): void {
     throw new HttpException(
       {
         statusCode,
@@ -27,6 +29,22 @@ export class ProfileService {
       },
       statusCode,
     );
+  }
+
+  // Helper function to validate file
+  validateFile(file: Express.Multer.File): void {
+    const allowedMimeTypes = ['image/jpeg', 'image/png'];  // Only allow jpg and png files
+    const maxFileSize = 1 * 1024 * 1024;  // 1 MB
+
+    const fileMimeType = mime.lookup(file.originalname);
+
+    if (!allowedMimeTypes.includes(fileMimeType)) {
+      this.throwError('File harus berupa gambar JPG atau PNG.', 400, ['file']);
+    }
+
+    if (file.size > maxFileSize) {
+      this.throwError('File tidak boleh lebih besar dari 1MB.', 400, ['file']);
+    }
   }
 
   calculateBMI(weight: number, height: number): number {
@@ -51,11 +69,9 @@ export class ProfileService {
     });
 
     if (!user) {
-      this.throwError(
-        'User dengan username tersebut tidak ditemukan',
-        400,
-        ['username'],
-      );
+      this.throwError('User dengan username tersebut tidak ditemukan', 400, [
+        'username',
+      ]);
     }
 
     const existingProfile = await this.prisma.profile.findUnique({
@@ -71,18 +87,20 @@ export class ProfileService {
     }
 
     if (age <= 0 || weight <= 0 || height <= 0) {
-      this.throwError(
-        'Age, weight, and height must be positive values.',
-        400,
-        ['age', 'weight', 'height'],
-      );
+      this.throwError('Age, weight, and height must be positive values.', 400, [
+        'age',
+        'weight',
+        'height',
+      ]);
     }
 
     const bmi = this.calculateBMI(weight, height);
     const kcal = this.calculateKcal(age, gender);
 
-    let photoUrl: string = 'https://storage.googleapis.com/db-cpastone/default-image/default';
+    let photoUrl: string =
+      'https://storage.googleapis.com/db-cpastone/default-image/default';
     if (file) {
+      this.validateFile(file);  // Validate the file
       photoUrl = await this.googleCloudStorageService.uploadFile(file);
     }
 
@@ -108,8 +126,6 @@ export class ProfileService {
       ]);
     }
   }
-
-
 
   async getProfile(getProfileDto: GetProfileDto) {
     const profile = await this.prisma.profile.findUnique({
@@ -146,8 +162,16 @@ export class ProfileService {
         : profile.weight,
     };
 
-    if (updateProfileDto.weight || updateProfileDto.height || updatedProfileData.age) {
-      if (updateProfileDto.weight <= 0 || updateProfileDto.height <= 0 || updateProfileDto.age <= 0) {
+    if (
+      updateProfileDto.weight ||
+      updateProfileDto.height ||
+      updatedProfileData.age
+    ) {
+      if (
+        updateProfileDto.weight <= 0 ||
+        updateProfileDto.height <= 0 ||
+        updateProfileDto.age <= 0
+      ) {
         this.throwError(
           'Age, weight, dan height harus memiliki nilai positif.',
           400,
@@ -165,6 +189,7 @@ export class ProfileService {
     }
 
     if (file) {
+      this.validateFile(file);  // Validate the file
       updatedProfileData.photoUrl =
         await this.googleCloudStorageService.uploadFile(file);
     }
@@ -176,11 +201,9 @@ export class ProfileService {
       });
       return { data: updatedProfile };
     } catch (error) {
-      this.throwError(
-        'Gagal memperbarui profil. Silakan coba lagi.',
-        500,
-        ['updateProfile'],
-      );
+      this.throwError('Gagal memperbarui profil. Silakan coba lagi.', 500, [
+        'updateProfile',
+      ]);
     }
   }
 }

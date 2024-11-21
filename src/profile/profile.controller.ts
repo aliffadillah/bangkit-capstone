@@ -24,11 +24,9 @@ export class ProfileController {
 
   private validateToken(token: string, username: string) {
     if (!token) {
-      this.profileService.throwError(
-        'Token tidak tersedia',
-        401,
-        ['authorization'],
-      );
+      this.profileService.throwError('Token tidak tersedia', 401, [
+        'authorization',
+      ]);
     }
 
     const decoded = this.jwtService.decode(token.replace('Bearer ', '')) as any;
