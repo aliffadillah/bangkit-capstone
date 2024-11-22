@@ -41,11 +41,15 @@ Response Body (Success/200) :
 
 ```json
 {
-  "data": {
-    "calories": "2000",
-    "sugar": "20",
-    "fats": "10",
-    "date_added": "DateTime"
+  "text": {
+    "raw_ocr_text": "data",
+    "data": {
+      "calories": "",
+      "sugar": "",
+      "fats": "",
+      "salt": "",
+      "date_added": "date"
+    }
   }
 }
 ```
