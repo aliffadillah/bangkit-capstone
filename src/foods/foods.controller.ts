@@ -40,7 +40,7 @@ export class FoodsController {
   async addFood(
     @Headers('authorization') authHeader: string,
     @Query('username') username: string,
-    @Body() data: (typeof UserFoodsDTO.POST)['_type'], // Menggunakan DTO untuk validasi input
+    @Body() data: (typeof UserFoodsDTO.POST)['_type'],
   ) {
     const payload = this.validateToken(authHeader);
 
@@ -111,7 +111,7 @@ export class FoodsController {
     @Headers('authorization') authHeader: string,
     @Param('id') foodId: string,
     @Query('username') username: string,
-    @Body() data: (typeof UserFoodsDTO.UPDATE)['_type'], // Menggunakan DTO untuk validasi input
+    @Body() data: (typeof UserFoodsDTO.UPDATE)['_type'],
   ) {
     const payload = this.validateToken(authHeader);
 

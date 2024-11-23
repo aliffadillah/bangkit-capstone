@@ -7,7 +7,7 @@ import {
   UpdateProfileDto,
   Gender,
 } from './profile.dto';
-import * as mime from 'mime-types'; // Import mime-types for file validation
+import * as mime from 'mime-types';
 
 @Injectable()
 export class ProfileService {
@@ -31,10 +31,9 @@ export class ProfileService {
     );
   }
 
-  // Helper function to validate file
   validateFile(file: Express.Multer.File): void {
-    const allowedMimeTypes = ['image/jpeg', 'image/png']; // Only allow jpg and png files
-    const maxFileSize = 1 * 1024 * 1024; // 1 MB
+    const allowedMimeTypes = ['image/jpeg', 'image/png'];
+    const maxFileSize = 1 * 1024 * 1024;
 
     const fileMimeType = mime.lookup(file.originalname);
 

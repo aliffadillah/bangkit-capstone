@@ -9,8 +9,8 @@ export class CreateProfileDto {
   height: number;
   weight: number;
   username: string;
-  photo?: Express.Multer.File; // File object for upload
-  photoUrl?: string; // URL of the uploaded file
+  photo?: Express.Multer.File;
+  photoUrl?: string;
 }
 
 export class GetProfileDto {
@@ -24,6 +24,6 @@ export class UpdateProfileDto {
   weight?: number;
   bmi?: number;
   kcal?: number;
-  photo?: Express.Multer.File; // File object for upload
-  photoUrl?: string; // URL of the uploaded file
+  photo?: Express.Multer.File;
+  photoUrl?: string;
 }
