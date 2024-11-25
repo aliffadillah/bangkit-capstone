@@ -6,7 +6,10 @@ import { Dashboard } from './dashboard.dto';
 export class DashboardService {
   constructor(private prisma: PrismaService) {}
 
-  async calculateDashboardData(username: string, date: Date): Promise<Dashboard> {
+  async calculateDashboardData(
+    username: string,
+    date: Date,
+  ): Promise<Dashboard> {
     const startOfDay = new Date(date.setHours(0, 0, 0, 0));
     const endOfDay = new Date(date.setHours(23, 59, 59, 999));
 
@@ -37,7 +40,9 @@ export class DashboardService {
 
     const bmi = userProfile ? userProfile.bmi : null;
 
-    const progressPercentage = Math.round((totalCalories / userProfile.kcal) * 100);
+    const progressPercentage = Math.round(
+      (totalCalories / userProfile.kcal) * 100,
+    );
 
     return {
       progress_percentage: progressPercentage,
@@ -50,6 +55,4 @@ export class DashboardService {
       advices: 'Seimbangkan asupan Anda dengan menambah serat...', //kaga tau gua advice mau diisi apaa
     };
   }
-
-
 }

@@ -29,11 +29,9 @@ import { DashboardModule } from './dashboard/dashboard.module';
     FoodsModule,
     OcrModule,
     HttpModule,
-    DashboardModule
+    DashboardModule,
   ],
-  controllers: [
-    AddFotoController,
-  ],
+  controllers: [AddFotoController],
   providers: [GoogleCloudStorageService],
   exports: [GoogleCloudStorageService],
 })
