@@ -9,6 +9,9 @@ COPY package*.json ./
 
 RUN npm install --only=production
 
+# Install Google Cloud Storage dependencies
+RUN npm install @google-cloud/storage
+
 FROM base AS build
 
 RUN npm install
@@ -26,6 +29,9 @@ RUN npx prisma generate
 RUN npm run build
 
 FROM base AS final
+
+# Copy kunci layanan (service account) ke dalam container
+COPY ./config/my-service-account.json /usr/src/app/config/my-service-account.json
 
 COPY --from=build /usr/src/app/dist ./dist
 COPY --from=build /usr/src/app/node_modules ./node_modules
