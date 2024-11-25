@@ -1,0 +1,11 @@
+# Node.js dependencies
+node_modules
+npm-debug.log
+
+# Build output
+dist
+*.log
+
+# Files not needed in final image
+Dockerfile
+docker-compose.yml
