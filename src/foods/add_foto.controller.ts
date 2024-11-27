@@ -14,6 +14,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { HttpService } from '@nestjs/axios';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config'; // Import ConfigService
 import { Response } from 'express';
 import * as FormData from 'form-data';
 
@@ -22,6 +23,7 @@ export class AddFotoController {
   constructor(
     private readonly httpService: HttpService,
     private readonly jwtService: JwtService, // Inject JwtService for token verification
+    private readonly configService: ConfigService, // Inject ConfigService
   ) {}
 
   private validateToken(authHeader: string): { username: string } {
@@ -73,7 +75,8 @@ export class AddFotoController {
     const formData = new FormData();
     formData.append('file', file.buffer, file.originalname);
 
-    const ocrApiUrl = 'http://localhost:3000/api/ocr-food';
+    // Retrieve the ML API URL from environment variables
+    const ocrApiUrl = this.configService.get<string>('ML_API_URL');
 
     const response = await this.httpService
       .post(ocrApiUrl, formData, {
@@ -96,9 +99,11 @@ export class AddFotoController {
     const payload = this.validateToken(authHeader);
 
     try {
-      // Forward the GET request with the ID to the OCR API
-      const ocrApiUrl = `http://localhost:3000/api/ocr-food/${id}`;
-      const response = await this.httpService.get(ocrApiUrl).toPromise();
+      // Retrieve the ML API URL from environment variables
+      const ocrApiUrl = this.configService.get<string>('ML_API_URL');
+      const response = await this.httpService
+        .get(`${ocrApiUrl}/${id}`)
+        .toPromise();
 
       // Return the response from the OCR API to the client
       return res.status(HttpStatus.OK).json({

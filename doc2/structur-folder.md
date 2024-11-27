@@ -1,4 +1,4 @@
-/prisma
+~~/prisma
 /migrations
 - schema.prisma
 
@@ -34,4 +34,4 @@
 - user.validation.ts
 
 - app.module.ts
-- main.ts
+- main.ts~~

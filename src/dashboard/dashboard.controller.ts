@@ -25,7 +25,11 @@ export class DashboardController {
 
     const decoded = this.jwtService.decode(token.replace('Bearer ', '')) as any;
 
-    if (!decoded || typeof decoded !== 'object' || decoded.username !== username) {
+    if (
+      !decoded ||
+      typeof decoded !== 'object' ||
+      decoded.username !== username
+    ) {
       throw new HttpException('Invalid token or unauthorized user', 401);
     }
   }

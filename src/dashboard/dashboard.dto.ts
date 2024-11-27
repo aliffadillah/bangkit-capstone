@@ -10,5 +10,5 @@ export class Dashboard {
     daily_salt: z.number().min(1).max(100),
     bmi: z.number().min(1).max(100),
     advices: z.string().min(1).max(1024),
-  })
+  });
 }
