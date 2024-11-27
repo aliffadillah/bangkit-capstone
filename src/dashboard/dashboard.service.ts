@@ -20,10 +20,8 @@ export class DashboardService {
       },
     });
 
-    console.log('Foods data:', foods);
-
     if (!foods || foods.length === 0) {
-      throw new Error('No food data available for this date');
+      throw new Error('Data Dashboard tidak tersedia');
     }
 
     const totalCalories = foods.reduce((acc, food) => acc + food.calories, 0);
@@ -47,9 +45,8 @@ export class DashboardService {
       daily_fat: totalFat,
       daily_salt: totalSalt,
       bmi,
-      advices: 'Seimbangkan asupan Anda dengan menambah serat...', //kaga tau gua advice mau diisi apaa
+      advices: 'Seimbangkan asupan Anda dengan menambah serat...',
     };
   }
-
-
 }
+

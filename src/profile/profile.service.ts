@@ -99,7 +99,7 @@ export class ProfileService {
     let photoUrl: string =
       'https://storage.googleapis.com/db-cpastone/default-image/default';
     if (file) {
-      this.validateFile(file); // Validate the file
+      this.validateFile(file);
       photoUrl = await this.googleCloudStorageService.uploadFile(file);
     }
 
@@ -188,7 +188,7 @@ export class ProfileService {
     }
 
     if (file) {
-      this.validateFile(file); // Validate the file
+      this.validateFile(file);
       updatedProfileData.photoUrl =
         await this.googleCloudStorageService.uploadFile(file);
     }

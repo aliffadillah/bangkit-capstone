@@ -2,8 +2,10 @@ import {
   Controller,
   Get,
   Param,
+  Query,
   Headers,
-  HttpException, HttpCode,
+  HttpException,
+  HttpCode,
 } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { JwtService } from '@nestjs/jwt';
@@ -28,12 +30,12 @@ export class DashboardController {
     }
   }
 
-  @Get(':username&:date')
+  @Get(':username')
   @HttpCode(200)
   async getDashboardData(
     @Headers('authorization') token: string,
     @Param('username') username: string,
-    @Param('date') date: string,
+    @Query('date') date: string,
   ): Promise<WebResponse<any>> {
     try {
       this.validateToken(token, username);
@@ -49,9 +51,16 @@ export class DashboardController {
 
       return {
         data: dashboardData,
-        message: `Dashboard data retrieved successfully for ${username} on ${date}`,
+        message: `Dashboard data retrieved successfully for ${username}`,
       };
     } catch (error) {
+      if (error.message === 'Data Dashboard tidak tersedia') {
+        throw new HttpException(
+          { errors: { message: error.message } },
+          404,
+        );
+      }
+
       throw new HttpException(
         {
           errors: { message: error.message },

@@ -1,5 +1,0 @@
--- AlterTable
-ALTER TABLE `profile` MODIFY `height` INTEGER NOT NULL,
-    MODIFY `weight` INTEGER NOT NULL,
-    MODIFY `kcal` INTEGER NULL,
-    MODIFY `bmi` INTEGER NULL;

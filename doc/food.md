@@ -1,10 +1,8 @@
 # FOOD API SPEC 
 
-# KURANG TAMBAHAN FITUR FILTER UNTUK HISTORY BASED ON DATE ADDED  
-
 ### POST FOOD 
 
-Endpoint : POST /api/food/username={username}
+Endpoint : POST /api/food/{username}
 
 ### Headers:
 
@@ -40,8 +38,8 @@ Response Body (Failed):
 
 ### GET FOOD
 
-Endpoint : GET /api/food/{food_id}?username={username}
-Endpoint History based od Date Added: GET /api/food/username={username}?date={tanggal}
+Endpoint : GET /api/food/{food_id}&{username}
+Endpoint History based od Date Added: GET /api/food/{username}?date={date}
 ### Headers:
 
 authorization: Authorization: Bearer <JWT_TOKEN>
@@ -72,7 +70,7 @@ Response Body (Failed):
 
 ### Update Food Details
 
-Endpoint : PATCH /api/food/{food_id}?username={username}
+Endpoint : PATCH /api/food/{food_id}&{username}
 
 ### Headers:
 
@@ -115,7 +113,7 @@ Response Body (Failed):
 ```
 
 ## Delete Food Item
-Endpoint : DELETE /api/food/{food_id}?username={username}
+Endpoint : DELETE /api/food/{food_id}&{username}
 
 ### Headers:
 

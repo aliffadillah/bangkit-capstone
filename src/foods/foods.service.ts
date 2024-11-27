@@ -1,10 +1,21 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { UserFoodsDTO } from './foods.dto';
 
 @Injectable()
 export class FoodsService {
   constructor(private prisma: PrismaService) {}
+
+  throwError(message: string, statusCode: number, details: string[] = []) {
+    throw new HttpException(
+      {
+        statusCode,
+        message,
+        details,
+      },
+      statusCode,
+    );
+  }
 
   private calculateGrade(sugar: number, fats: number): string {
     let sugarGrade: string;
@@ -18,7 +29,7 @@ export class FoodsService {
       sugarGrade = 'D';
     }
 
-    let fatGrade: string = sugarGrade;
+    let fatGrade = sugarGrade;
     if (fats > 10) {
       if (sugarGrade === 'A') {
         fatGrade = 'B';
@@ -44,26 +55,28 @@ export class FoodsService {
     return FoodCategoryMapping[category] || category;
   }
 
-  async createFood(
-    username: string,
-    data: (typeof UserFoodsDTO.POST)['_type'],
-  ) {
-    const grade = this.calculateGrade(data.sugar, data.fats);
+  async createFood(username: string, data: (typeof UserFoodsDTO.POST)['_type']) {
+    try {
+      const grade = this.calculateGrade(data.sugar, data.fats);
 
-    const food = await this.prisma.foods.create({
-      data: {
-        ...data,
-        username,
-        grade,
-        date_added: new Date(),
-      },
-    });
+      const food = await this.prisma.foods.create({
+        data: {
+          ...data,
+          username,
+          grade,
+          date_added: new Date(),
+        },
+      });
 
-    // Return with mapped category for display
-    return {
-      ...food,
-      category: this.mapCategoryToDisplay(food.category),
-    };
+      return {
+        data: {
+          ...food,
+          category: this.mapCategoryToDisplay(food.category),
+        },
+      };
+    } catch (error) {
+      this.throwError('Gagal menambahkan makanan', 500, ['createFood']);
+    }
   }
 
   async getFoodById(foodId: number, username: string) {
@@ -72,17 +85,22 @@ export class FoodsService {
     });
 
     if (!food) {
-      throw new NotFoundException('Food not found');
+      this.throwError('Data makanan tidak ditemukan', 404, ['foodId']);
     }
 
-    // Return with mapped category for display
     return {
-      ...food,
-      category: this.mapCategoryToDisplay(food.category),
+      data: {
+        ...food,
+        category: this.mapCategoryToDisplay(food.category),
+      },
     };
   }
 
   async getHistoryByDate(username: string, date: string) {
+    if (!date || isNaN(Date.parse(date))) {
+      this.throwError('Parameter tanggal tidak valid', 400, ['date']);
+    }
+
     const startDate = new Date(date);
     const endDate = new Date(date);
     endDate.setDate(startDate.getDate() + 1);
@@ -98,12 +116,18 @@ export class FoodsService {
       orderBy: { date_added: 'asc' },
     });
 
-    // Map categories for display
-    return history.map((food) => ({
-      ...food,
-      category: this.mapCategoryToDisplay(food.category),
-    }));
+    if (history.length === 0) {
+      this.throwError('Data Foods Tidak Ditemukan', 404, ['date']);
+    }
+
+    return {
+      data: history.map((food) => ({
+        ...food,
+        category: this.mapCategoryToDisplay(food.category),
+      })),
+    };
   }
+
 
   async updateFood(foodId: number, username: string, data: any) {
     const existingFood = await this.prisma.foods.findFirst({
@@ -114,15 +138,14 @@ export class FoodsService {
     });
 
     if (!existingFood) {
-      throw new NotFoundException('Food not found');
+      this.throwError('Data makanan tidak ditemukan', 404, ['foodId']);
     }
 
     if (data.sugar || data.fats) {
-      const grade = this.calculateGrade(
+      data.grade = this.calculateGrade(
         data.sugar || existingFood.sugar,
         data.fats || existingFood.fats,
       );
-      data.grade = grade;
     }
 
     try {
@@ -131,13 +154,14 @@ export class FoodsService {
         data,
       });
 
-      // Return with mapped category for display
       return {
-        ...updatedFood,
-        category: this.mapCategoryToDisplay(updatedFood.category),
+        data: {
+          ...updatedFood,
+          category: this.mapCategoryToDisplay(updatedFood.category),
+        },
       };
     } catch (error) {
-      throw new Error('Internal server error');
+      this.throwError('Gagal memperbarui makanan', 500, ['updateFood']);
     }
   }
 
@@ -150,13 +174,17 @@ export class FoodsService {
     });
 
     if (!existingFood) {
-      throw new NotFoundException('Data tidak ditemukan');
+      this.throwError('Data makanan tidak ditemukan', 404, ['foodId']);
     }
 
-    await this.prisma.foods.delete({
-      where: { id: foodId },
-    });
+    try {
+      await this.prisma.foods.delete({
+        where: { id: foodId },
+      });
 
-    return { message: 'Data berhasil dihapus' };
+      return { message: 'Data berhasil dihapus' };
+    } catch (error) {
+      this.throwError('Gagal menghapus makanan', 500, ['deleteFood']);
+    }
   }
 }

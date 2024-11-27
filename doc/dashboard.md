@@ -2,7 +2,7 @@
 
 ### GET FOOD
 
-Endpoint : GET /api/dashboard/username&date
+Endpoint : GET /api/dashboard/username?date={date}
 
 ### Headers:
 

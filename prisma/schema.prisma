@@ -7,19 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Table
+// Model User
 model User {
-  username String  @id @db.VarChar(100)
+  username String  @id @unique @db.VarChar(100)
   password String  @db.VarChar(100)
-  name     String  @unique @db.VarChar(100)
+  name     String  @db.VarChar(100)
   email    String  @unique @db.VarChar(100)
   token    String? @db.VarChar(1024)
 
-  profileByUsername Profile? @relation("UserByUsername")
-  profileByName     Profile? @relation("UserByName")
-  profileByEmail    Profile? @relation("UserByEmail")
-
-  foods Foods[]
+  profiles Profile[] @relation("UserProfiles")
+  foods    Foods[]
 
   @@map("users")
 }
@@ -29,29 +26,28 @@ enum Gender {
   Perempuan
 }
 
+// Model Profile
 model Profile {
   id       Int     @id @default(autoincrement())
   age      Int
   gender   Gender
   height   Int
   weight   Int
-  kcal     Int?    @unique
-  bmi      Int?    @unique
+  kcal     Int?
+  bmi      Int?
   username String  @unique @db.VarChar(100)
-  name     String  @unique @db.VarChar(100)
+  name     String  @db.VarChar(100)
   email    String  @unique @db.VarChar(100)
   photoUrl String? @db.VarChar(255)
 
-  userByUsername User @relation("UserByUsername", fields: [username], references: [username])
-  userByName     User @relation("UserByName", fields: [name], references: [name])
-  userByEmail    User @relation("UserByEmail", fields: [email], references: [email])
+  user User @relation("UserProfiles", fields: [username], references: [username])
 
-  dashboardBmi         Dashboard[] @relation("ProfileByBmi")
-  dashboadCaloriesGoal Dashboard[] @relation("ProfileByKcal")
+  dashboards Dashboard[]
 
   @@map("profile")
 }
 
+// Enum FoodCategory
 enum FoodCategory {
   Makanan_Berat    @map("Makanan Berat")
   Makanan_Ringan   @map("Makanan Ringan")
@@ -61,11 +57,12 @@ enum FoodCategory {
   Produk_Beku      @map("Produk Beku")
 }
 
+// Model Foods
 model Foods {
   id           Int          @id @default(autoincrement())
   nama_makanan String       @db.VarChar(100)
   category     FoodCategory
-  calories     Int          @unique
+  calories     Int
   sugar        Int
   fats         Int
   salt         Int
@@ -77,6 +74,7 @@ model Foods {
   @@map("foods")
 }
 
+// Model Dashboard
 model Dashboard {
   id                  Int      @id @default(autoincrement())
   progress_percentage Int
@@ -89,8 +87,8 @@ model Dashboard {
   bmi                 Int
   advices             String   @db.VarChar(1024)
 
-  profileBmi          Profile @relation("ProfileByBmi", fields: [bmi], references: [bmi])
-  profileCaloriesGoal Profile @relation("ProfileByKcal", fields: [calories_goal], references: [kcal])
+  profileId Int
+  profile   Profile @relation(fields: [profileId], references: [id])
 
   @@map("dashboard")
 }

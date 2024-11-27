@@ -8,9 +8,7 @@ import {
   Post,
   Query,
   Headers,
-  NotFoundException,
-  UnauthorizedException,
-  BadRequestException,
+  HttpCode,
 } from '@nestjs/common';
 import { FoodsService } from './foods.service';
 import { JwtService } from '@nestjs/jwt';
@@ -23,132 +21,81 @@ export class FoodsController {
     private readonly jwtService: JwtService,
   ) {}
 
-  private validateToken(authHeader: string): { username: string } {
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Missing or invalid token');
+  private validateToken(token: string, username: string) {
+    if (!token) {
+      this.foodsService.throwError('Token tidak tersedia', 401, [
+        'authorization',
+      ]);
     }
 
-    const token = authHeader.split(' ')[1];
-    try {
-      return this.jwtService.verify(token);
-    } catch {
-      throw new UnauthorizedException('Invalid token');
+    const decoded = this.jwtService.decode(token.replace('Bearer ', '')) as any;
+
+    if (
+      !decoded ||
+      typeof decoded !== 'object' ||
+      decoded.username !== username
+    ) {
+      this.foodsService.throwError(
+        'Token tidak valid atau pengguna tidak ditemukan',
+        401,
+        ['authorization'],
+      );
     }
   }
 
-  @Post()
+  @Post(':username')
+  @HttpCode(200)
   async addFood(
-    @Headers('authorization') authHeader: string,
-    @Query('username') username: string,
+    @Headers('authorization') token: string,
+    @Param('username') username: string,
     @Body() data: (typeof UserFoodsDTO.POST)['_type'],
   ) {
-    const payload = this.validateToken(authHeader);
-
-    if (payload.username !== username) {
-      throw new UnauthorizedException('Unauthorized user');
-    }
-
-    try {
-      const food = await this.foodsService.createFood(username, data);
-      return {
-        message: 'Food item added successfully.',
-        data: {
-          food_id: food.id.toString(),
-          date_added: food.date_added.toISOString(),
-        },
-      };
-    } catch (error) {
-      return {
-        errors: 'Data tidak ditemukan',
-      };
-    }
+    this.validateToken(token, username);
+    return await this.foodsService.createFood(username, data);
   }
 
-  @Get(':id')
+  @Get(':food_id&:username')
+  @HttpCode(200)
   async getFood(
-    @Param('id') foodId: string,
-    @Query('username') username: string,
-    @Headers('authorization') authHeader: string,
+    @Headers('authorization') token: string,
+    @Param('food_id') foodId: string,
+    @Param('username') username: string,
   ) {
-    const payload = this.validateToken(authHeader);
-
-    if (payload.username !== username) {
-      throw new UnauthorizedException('Unauthorized user');
-    }
-
+    this.validateToken(token, username);
     return await this.foodsService.getFoodById(Number(foodId), username);
   }
 
-  @Get()
+  @Get(':username')
+  @HttpCode(200)
   async getHistory(
-    @Headers('authorization') authHeader: string,
-    @Query('username') username: string,
+    @Headers('authorization') token: string,
+    @Param('username') username: string,
     @Query('date') date: string,
   ) {
-    const payload = this.validateToken(authHeader);
-
-    if (payload.username !== username) {
-      throw new UnauthorizedException('Unauthorized user');
-    }
-
-    if (!date || isNaN(Date.parse(date))) {
-      throw new BadRequestException('Invalid or missing date parameter');
-    }
-
-    try {
-      const history = await this.foodsService.getHistoryByDate(username, date);
-      if (history.length === 0) {
-        return { message: 'No history found.' };
-      }
-      return { data: history };
-    } catch (error) {
-      return { errors: 'Server Error' };
-    }
+    this.validateToken(token, username);
+    return await this.foodsService.getHistoryByDate(username, date);
   }
 
-  @Patch(':id')
+  @Patch(':food_id&:username')
+  @HttpCode(200)
   async updateFood(
-    @Headers('authorization') authHeader: string,
-    @Param('id') foodId: string,
-    @Query('username') username: string,
+    @Headers('authorization') token: string,
+    @Param('food_id') foodId: string,
+    @Param('username') username: string,
     @Body() data: (typeof UserFoodsDTO.UPDATE)['_type'],
   ) {
-    const payload = this.validateToken(authHeader);
-
-    if (payload.username !== username) {
-      throw new UnauthorizedException('Unauthorized user');
-    }
-
-    const parsedFoodId = parseInt(foodId, 10);
-
-    return this.foodsService.updateFood(parsedFoodId, username, data);
+    this.validateToken(token, username);
+    return await this.foodsService.updateFood(Number(foodId), username, data);
   }
 
-  @Delete(':food_id')
+  @Delete(':food_id&:username')
+  @HttpCode(200)
   async deleteFood(
-    @Headers('authorization') authHeader: string,
+    @Headers('authorization') token: string,
     @Param('food_id') foodId: string,
-    @Query('username') username: string,
+    @Param('username') username: string,
   ) {
-    const payload = this.validateToken(authHeader);
-
-    if (payload.username !== username) {
-      throw new UnauthorizedException('Unauthorized user');
-    }
-
-    const parsedFoodId = parseInt(foodId, 10);
-
-    try {
-      const response = await this.foodsService.deleteFood(
-        parsedFoodId,
-        username,
-      );
-      return response;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        return { errors: 'Data tidak ditemukan' };
-      }
-      return { errors: 'Terjadi kesalahan server' };
-    }
+    this.validateToken(token, username);
+    return await this.foodsService.deleteFood(Number(foodId), username);
   }
 }

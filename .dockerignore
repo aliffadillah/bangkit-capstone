@@ -1,0 +1,10 @@
+# Node.js dependencies
+node_modules
+npm-debug.log
+
+dist
+*.log
+
+# File yang tidak dibutuhkan dalam image final
+Dockerfile
+docker-compose.yml
