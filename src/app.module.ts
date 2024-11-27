@@ -7,7 +7,6 @@ import { ProfileModule } from './profile/profile.module';
 import { UserModule } from './user/user.module';
 import { FoodsModule } from './foods/foods.module';
 import { GoogleCloudStorageService } from './common/google-cloud-storage.service';
-import { OcrModule } from './ocr/ocr.module';
 import { AddFotoController } from './foods/add_foto.controller';
 import { HttpModule } from '@nestjs/axios';
 import { DashboardModule } from './dashboard/dashboard.module';
@@ -27,7 +26,6 @@ import { DashboardModule } from './dashboard/dashboard.module';
     ProfileModule,
     UserModule,
     FoodsModule,
-    OcrModule,
     HttpModule,
     DashboardModule,
   ],
