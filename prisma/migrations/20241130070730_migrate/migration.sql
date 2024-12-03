@@ -25,6 +25,7 @@ CREATE TABLE `profile` (
     `email` VARCHAR(100) NOT NULL,
     `photoUrl` VARCHAR(255) NULL,
 
+    UNIQUE INDEX `profile_username_key`(`username`),
     UNIQUE INDEX `profile_email_key`(`email`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -42,7 +43,6 @@ CREATE TABLE `foods` (
     `username` VARCHAR(100) NOT NULL,
     `grade` VARCHAR(10) NULL,
 
-    UNIQUE INDEX `foods_calories_key`(`calories`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

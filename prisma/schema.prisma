@@ -85,7 +85,7 @@ model Dashboard {
   daily_fat           Int
   daily_salt          Int
   bmi                 Int
-  advices             String   @db.VarChar(1024)
+  // advices             String   @db.VarChar(1024)
 
   profileId Int
   profile   Profile @relation(fields: [profileId], references: [id])

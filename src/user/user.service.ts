@@ -45,8 +45,8 @@ export class UserService {
     this.logger.debug(`Register new user ${JSON.stringify(request)}`);
 
     try {
-      const registerRequest: RegisterUserRequest =
-        this.validationService.validate(UserValidation.REGISTER, request);
+      // Validasi dengan casting eksplisit
+      const registerRequest = UserValidation.REGISTER.parse(request) as RegisterUserRequest;
 
       if (registerRequest.password !== registerRequest.repeatPassword) {
         this.throwError('Passwords do not match', 400, [
@@ -66,8 +66,8 @@ export class UserService {
       }
 
       registerRequest.password = await bcrypt.hash(
-        registerRequest.password,
-        10,
+          registerRequest.password,
+          10,
       );
 
       const user = await this.prismaService.user.create({
@@ -86,9 +86,9 @@ export class UserService {
     } catch (error) {
       if (error instanceof ZodError) {
         this.throwError(
-          'Validation error',
-          400,
-          error.errors.map((e) => e.message),
+            'Validation error',
+            400,
+            error.errors.map((e) => e.message),
         );
       }
       throw error;
@@ -96,15 +96,13 @@ export class UserService {
   }
 
   async login(
-    request: LoginUserRequest,
+      request: LoginUserRequest,
   ): Promise<{ username: string; name: string; token: string }> {
     this.logger.debug(`UserService.login(${JSON.stringify(request)})`);
 
     try {
-      const loginRequest: LoginUserRequest = this.validationService.validate(
-        UserValidation.LOGIN,
-        request,
-      );
+      // Validasi dengan casting eksplisit
+      const loginRequest = UserValidation.LOGIN.parse(request) as LoginUserRequest;
 
       const user = await this.prismaService.user.findUnique({
         where: {
@@ -113,8 +111,8 @@ export class UserService {
       });
 
       if (
-        !user ||
-        !(await bcrypt.compare(loginRequest.password, user.password))
+          !user ||
+          !(await bcrypt.compare(loginRequest.password, user.password))
       ) {
         this.throwError('Username or password is invalid', 401, [
           'username',
@@ -138,14 +136,15 @@ export class UserService {
     } catch (error) {
       if (error instanceof ZodError) {
         this.throwError(
-          'Validation error',
-          400,
-          error.errors.map((e) => e.message),
+            'Validation error',
+            400,
+            error.errors.map((e) => e.message),
         );
       }
       throw error;
     }
   }
+
 
   async get(user: User): Promise<UserResponse> {
     return {
