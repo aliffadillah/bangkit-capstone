@@ -6,10 +6,7 @@ import { Dashboard } from './dashboard.dto';
 export class DashboardService {
   constructor(private prisma: PrismaService) {}
 
-  async dashboardUsers(
-      username: string,
-      date: Date,
-  ): Promise<Dashboard> {
+  async dashboardUsers(username: string, date: Date): Promise<Dashboard> {
     const startOfDay = new Date(date.setHours(0, 0, 0, 0));
     const endOfDay = new Date(date.setHours(23, 59, 59, 999));
 
@@ -41,7 +38,7 @@ export class DashboardService {
     }
 
     const progressPercentage = Math.round(
-        (totalCalories / (userProfile.kcal || 1)) * 100,
+      (totalCalories / (userProfile.kcal || 1)) * 100,
     );
 
     const existingDashboard = await this.prisma.dashboard.findFirst({
@@ -89,6 +86,61 @@ export class DashboardService {
       daily_salt: totalSalt,
       bmi: userProfile.bmi,
       advices: 'Seimbangkan asupan Anda dengan menambah serat...',
+    };
+  }
+
+  async getWeeklyCalories(username: string): Promise<any> {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 6); // 7 hari ke belakang
+
+    const foods = await this.prisma.foods.findMany({
+      where: {
+        username: username,
+        date_added: {
+          gte: startDate,
+          lt: endDate,
+        },
+      },
+    });
+
+    if (!foods || foods.length === 0) {
+      throw new Error('No data available for the past 7 days');
+    }
+
+    const dailyData = Array.from({ length: 7 }, (_, i) => {
+      const currentDate = new Date();
+      currentDate.setDate(endDate.getDate() - i);
+      const dayFoods = foods.filter(
+        (food) => food.date_added.toDateString() === currentDate.toDateString(),
+      );
+
+      const totalCalories = dayFoods.reduce(
+        (acc, food) => acc + food.calories,
+        0,
+      );
+      const totalSugar = dayFoods.reduce((acc, food) => acc + food.sugar, 0);
+      const totalFat = dayFoods.reduce((acc, food) => acc + food.fats, 0);
+      const totalSalt = dayFoods.reduce((acc, food) => acc + food.salt, 0);
+
+      return {
+        calories: totalCalories,
+        sugar: totalSugar,
+        fat: totalFat,
+        salt: totalSalt,
+      };
+    }).reverse(); // Untuk urutan dari hari pertama ke hari terakhir
+
+    const calories = dailyData.map((data) => data.calories);
+    const sugar = dailyData.map((data) => data.sugar);
+    const fat = dailyData.map((data) => data.fat);
+    const salt = dailyData.map((data) => data.salt);
+
+    return {
+      calories,
+      sugar,
+      fat,
+      salt,
     };
   }
 }

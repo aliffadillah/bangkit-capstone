@@ -55,7 +55,10 @@ export class FoodsService {
     return FoodCategoryMapping[category] || category;
   }
 
-  async createFood(username: string, data: (typeof UserFoodsDTO.POST)['_type']) {
+  async createFood(
+    username: string,
+    data: (typeof UserFoodsDTO.POST)['_type'],
+  ) {
     try {
       const grade = this.calculateGrade(data.sugar, data.fats);
 
@@ -127,7 +130,6 @@ export class FoodsService {
       })),
     };
   }
-
 
   async updateFood(foodId: number, username: string, data: any) {
     const existingFood = await this.prisma.foods.findFirst({

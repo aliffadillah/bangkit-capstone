@@ -3,6 +3,12 @@
 - schema.prisma
 
 /src
+/dashboard
+- dashboard.controller.ts
+- dashboard.dto.ts
+- dashboard.module.ts
+- dashboard.service.ts
+
 /common
 - auth.decorator.ts
 - auth.middleware.ts

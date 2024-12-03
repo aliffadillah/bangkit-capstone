@@ -1,6 +1,6 @@
 # Dashboard API SPEC
 
-### GET FOOD
+### GET DASHBOARD
 
 Endpoint : GET /api/dashboard/username?date={date}
 
@@ -32,4 +32,29 @@ Respone Body: :
 }
 
 
+```
+### GET CALORIES WEEKLY
+
+Endpoint : GET /api/dashboard/johndoe/weekly-calories
+
+### Headers:
+
+authorization: Authorization: Bearer <JWT_TOKEN>
+
+Respone Body: :
+
+calories: Total calories consumed for each of the past 7 days.
+sugar: Amount of sugar consumed (in grams) for each day.
+fat: Total fat consumed (in grams) for each day.
+salt: Total salt consumed (in grams) for each day.
+
+```json
+{
+  "data": {
+    "calories": [293, 230, 242, 188, 187, 264, 199],
+    "sugar": [10, 20, 15, 18, 17, 16, 19],
+    "fat": [5, 10, 7, 9, 8, 6, 11],
+    "salt": [1, 2, 1.5, 1.8, 1.7, 1.6, 1.9]
+  }
+}
 ```
