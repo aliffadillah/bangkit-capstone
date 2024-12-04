@@ -16,7 +16,7 @@ RUN npm install
 COPY prisma ./prisma
 COPY src ./src
 COPY .env .env
-COPY config/my-service-account.json ./config/my-service-account.json # Add this line to copy the file
+COPY config/my-service-account.json ./config/my-service-account.json
 
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
@@ -32,7 +32,7 @@ COPY --from=build /usr/src/app/dist ./dist
 COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/package*.json ./
 COPY --from=build /usr/src/app/.env .env
-COPY --from=build /usr/src/app/config/my-service-account.json ./config/my-service-account.json # Add this line to include the file in the final image
+COPY --from=build /usr/src/app/config/my-service-account.json ./config/my-service-account.json
 
 EXPOSE 3000
 
