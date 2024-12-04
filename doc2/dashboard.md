@@ -35,7 +35,7 @@ Respone Body: :
 ```
 ### GET CALORIES WEEKLY
 
-Endpoint : GET /api/dashboard/johndoe/weekly-calories
+Endpoint : GET /api/dashboard/username/weekly-calories
 
 ### Headers:
 

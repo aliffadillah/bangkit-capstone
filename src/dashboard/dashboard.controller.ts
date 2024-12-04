@@ -72,16 +72,13 @@ export class DashboardController {
     }
   }
 
-  // Endpoint untuk melihat nutrisi dalam 7 hari terakhir
+  // Endpoint untuk melihat nutrisi dalam 7 hari terakhir (tanpa JWT)
   @Get(':username/weekly-calories')
   @HttpCode(200)
   async getWeeklyCalories(
-    @Headers('authorization') token: string,
     @Param('username') username: string,
   ): Promise<WebResponse<any>> {
     try {
-      this.validateToken(token, username);
-
       const weeklyData =
         await this.dashboardService.getWeeklyCalories(username);
 
