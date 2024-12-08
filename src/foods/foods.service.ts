@@ -1,6 +1,8 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { UserFoodsDTO } from './foods.dto';
+import axios from 'axios';
+import * as FormData from 'form-data';
 
 @Injectable()
 export class FoodsService {
@@ -8,12 +10,12 @@ export class FoodsService {
 
   throwError(message: string, statusCode: number, details: string[] = []) {
     throw new HttpException(
-      {
+        {
+          statusCode,
+          message,
+          details,
+        },
         statusCode,
-        message,
-        details,
-      },
-      statusCode,
     );
   }
 
@@ -56,8 +58,8 @@ export class FoodsService {
   }
 
   async createFood(
-    username: string,
-    data: (typeof UserFoodsDTO.POST)['_type'],
+      username: string,
+      data: (typeof UserFoodsDTO.POST)['_type'],
   ) {
     try {
       const grade = this.calculateGrade(data.sugar, data.fats);
@@ -79,6 +81,29 @@ export class FoodsService {
       };
     } catch (error) {
       this.throwError('Gagal menambahkan makanan', 500, ['createFood']);
+    }
+  }
+
+  async processOCR(fileBuffer: Buffer) {
+    const OCR_BASE_URL = process.env.OCR_BASE_URL;
+
+    if (!OCR_BASE_URL) {
+      this.throwError('OCR_BASE_URL tidak ditemukan dalam konfigurasi', 500, ['OCR_BASE_URL']);
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileBuffer, 'image.jpg');
+
+    try {
+      const response = await axios.post(OCR_BASE_URL, formData, {
+        headers: {
+          ...formData.getHeaders(),
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      this.throwError('Gagal memproses OCR', 500, ['processOCR']);
     }
   }
 
@@ -145,8 +170,8 @@ export class FoodsService {
 
     if (data.sugar || data.fats) {
       data.grade = this.calculateGrade(
-        data.sugar || existingFood.sugar,
-        data.fats || existingFood.fats,
+          data.sugar || existingFood.sugar,
+          data.fats || existingFood.fats,
       );
     }
 
