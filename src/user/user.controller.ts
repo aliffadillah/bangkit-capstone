@@ -25,8 +25,8 @@ export class UserController {
   @Post()
   @HttpCode(200)
   async register(
-    @Body() request: RegisterUserRequest,
-  ): Promise<WebResponse<UserResponse>> {
+      @Body() request: RegisterUserRequest,
+  ): Promise<WebResponse<{ username: string; name: string; token: string }>> {
     const result = await this.userService.register(request);
     return {
       data: result,

@@ -41,13 +41,12 @@ export class UserService {
     );
   }
 
-  async register(request: RegisterUserRequest): Promise<UserResponse> {
+  async register(request: RegisterUserRequest): Promise<{ username: string; name: string; token: string }> {
     this.logger.debug(`Register new user ${JSON.stringify(request)}`);
 
     try {
-      // Validasi dengan casting eksplisit
       const registerRequest = UserValidation.REGISTER.parse(
-        request,
+          request,
       ) as RegisterUserRequest;
 
       if (registerRequest.password !== registerRequest.repeatPassword) {
@@ -68,8 +67,8 @@ export class UserService {
       }
 
       registerRequest.password = await bcrypt.hash(
-        registerRequest.password,
-        10,
+          registerRequest.password,
+          10,
       );
 
       const user = await this.prismaService.user.create({
@@ -81,21 +80,31 @@ export class UserService {
         },
       });
 
+      const payload = { username: user.username };
+      const token = this.jwtService.sign(payload);
+
+      await this.prismaService.user.update({
+        where: { username: user.username },
+        data: { token },
+      });
+
       return {
         username: user.username,
         name: user.name,
+        token: token,
       };
     } catch (error) {
       if (error instanceof ZodError) {
         this.throwError(
-          'Validation error',
-          400,
-          error.errors.map((e) => e.message),
+            'Validation error',
+            400,
+            error.errors.map((e) => e.message),
         );
       }
       throw error;
     }
   }
+
 
   async login(
     request: LoginUserRequest,
@@ -103,7 +112,6 @@ export class UserService {
     this.logger.debug(`UserService.login(${JSON.stringify(request)})`);
 
     try {
-      // Validasi dengan casting eksplisit
       const loginRequest = UserValidation.LOGIN.parse(
         request,
       ) as LoginUserRequest;
