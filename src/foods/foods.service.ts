@@ -45,22 +45,7 @@ export class FoodsService {
     return fatGrade;
   }
 
-  private mapCategoryToDisplay(category: string): string {
-    const FoodCategoryMapping = {
-      MAKANAN_BERAT: 'Makanan Berat',
-      MAKANAN_RINGAN: 'Makanan Ringan',
-      MINUMAN_NON_SODA: 'Minuman Non-Soda',
-      MINUMAN_BERSODA: 'Minuman Bersoda',
-      MINUMAN_SEHAT: 'Minuman Sehat',
-      PRODUK_BEKU: 'Produk Beku',
-    };
-    return FoodCategoryMapping[category] || category;
-  }
-
-  async createFood(
-      username: string,
-      data: (typeof UserFoodsDTO.POST)['_type'],
-  ) {
+  async createFood(username: string, data: (typeof UserFoodsDTO.POST)['_type']) {
     try {
       const grade = this.calculateGrade(data.sugar, data.fats);
 
@@ -73,16 +58,12 @@ export class FoodsService {
         },
       });
 
-      return {
-        data: {
-          ...food,
-          category: this.mapCategoryToDisplay(food.category),
-        },
-      };
+      return { data: food };
     } catch (error) {
       this.throwError('Gagal menambahkan makanan', 500, ['createFood']);
     }
   }
+
 
   async processOCR(fileBuffer: Buffer) {
     const OCR_BASE_URL = process.env.OCR_BASE_URL;
@@ -116,12 +97,7 @@ export class FoodsService {
       this.throwError('Data makanan tidak ditemukan', 404, ['foodId']);
     }
 
-    return {
-      data: {
-        ...food,
-        category: this.mapCategoryToDisplay(food.category),
-      },
-    };
+    return { data: food };
   }
 
   async getHistoryByDate(username: string, date: string) {
@@ -148,12 +124,7 @@ export class FoodsService {
       this.throwError('Data Foods Tidak Ditemukan', 404, ['date']);
     }
 
-    return {
-      data: history.map((food) => ({
-        ...food,
-        category: this.mapCategoryToDisplay(food.category),
-      })),
-    };
+    return { data: history };
   }
 
   async updateFood(foodId: number, username: string, data: any) {
@@ -181,12 +152,7 @@ export class FoodsService {
         data,
       });
 
-      return {
-        data: {
-          ...updatedFood,
-          category: this.mapCategoryToDisplay(updatedFood.category),
-        },
-      };
+      return { data: updatedFood };
     } catch (error) {
       this.throwError('Gagal memperbarui makanan', 500, ['updateFood']);
     }

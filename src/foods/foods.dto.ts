@@ -1,13 +1,5 @@
 import { z, ZodType } from 'zod';
 
-export const FoodCategoryEnum = z.enum([
-  'Makanan_Berat',
-  'Makanan_Ringan',
-  'Minuman_Non_Soda',
-  'Minuman_Bersoda',
-  'Minuman_Sehat',
-  'Produk_Beku',
-]);
 
 export class UserFoodsDTO {
   static readonly POST: ZodType = z.object({
